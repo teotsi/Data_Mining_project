@@ -19,14 +19,34 @@ pd.set_option('display.width', 1000)
 
 filename = 'train.csv'
 df_train = pd.read_csv(filename)
-print(df_train.head(10))
+#print(df_train.head(10))
 
-print(df_train.shape)
+#print(df_train.shape)
 
 df_test = pd.read_csv('test.csv')
-print(df_test.head(10))
+#print(df_test.head(10))
 
-print (df_test.shape)
+#print (df_test.shape)
 
 df_train = df_train.drop(['atemp', 'casual', 'registered', 'windspeed'], axis=1)
-print(df_train.head(10))
+#print(df_train.head(10))
+
+df_train.rename(columns={'weathersit':'weather',
+                     'mnth':'month',
+                     'hr':'hour',
+                     'yr':'year',
+                     'hum': 'humidity',
+                     'cnt':'count'},inplace=True)
+#Training
+
+# Training and test data is created by splitting the main data. 30% of test data is considered
+X = df_train[['temp', 'humidity', 'workingday']]
+y = df_train['count']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+#->Prediction
+clf = LinearRegression()
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(y_pred)
