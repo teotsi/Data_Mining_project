@@ -27,11 +27,15 @@ ohd['weather'] = ohd.weather.astype('category')
 le = LabelEncoder()
 ohd_2 = ohd.apply(le.fit_transform)
 
-#print(ohd_2.head(5))
-one_hot_encoder = OneHotEncoder(categorical_features=[0])   #This command separates the season column into 4 binary columns
+#print(ohd.head(5))
+
+one_hot_encoder = OneHotEncoder(categorical_features=[0,1,2,3,4,5,6,7])   #This command separates the first 8 columns into binary columns
 one_hot_encoder.fit(ohd_2)
 
-oneHotLabels = one_hot_encoder.transform(ohd_2).toarray()   #This is why this array has 18 columns instead of 15(The first 4 are the binary columns)
+#print(ohd_2.head(10))
+
+oneHotLabels = one_hot_encoder.fit_transform(ohd_2).toarray()   #This is why this array has 18 columns instead of 15(The first 4 are the binary columns)
 print(oneHotLabels[:10])
 #print(ohd.columns)
 #print(ohd.head(10))
+
