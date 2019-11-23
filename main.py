@@ -42,7 +42,6 @@ one_hot_columns = list(df_train.columns)  # getting all columns
 pure_columns = ['temp', 'humidity', 'count']  # these are not categorical columns
 one_hot_columns = [x for x in one_hot_columns if x not in pure_columns]  # excluding non-cat columns
 for column in one_hot_columns:
-    print("yikes")
     df_train = pd.concat([df_train.drop(column, axis=1), pd.get_dummies(df_train[column], prefix=column)],
                          axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
 
