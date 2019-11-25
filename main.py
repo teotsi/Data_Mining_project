@@ -2,6 +2,11 @@
 
 import numpy as np
 import pandas as pd
+<<<<<<< HEAD
+=======
+import matplotlib.pyplot as plt
+# matplotlib inline
+>>>>>>> 484eaecff2045f84f11aa58e15fb8bb9e278ef06
 import seaborn as sn
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
@@ -16,6 +21,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 
 filename = 'train.csv'
 df_train = pd.read_csv(filename)
+<<<<<<< HEAD
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
 
@@ -81,6 +87,49 @@ sn.heatmap(data_corr, mask=mask, vmax=1, square=True, annot=True, cmap="YlGnBu")
 # clf.fit(X_train, y_train)
 # y_pred = clf.predict(X_test)
 # print(y_pred)
+=======
+print(df_train.head(10))
+
+# print(df_train.shape)
+
+df_test = pd.read_csv('test.csv')
+# print(df_test.head(10))
+
+# print (df_test.shape)
+
+df_train = df_train.drop(['atemp', 'casual', 'registered', 'windspeed'], axis=1)
+# print(df_train.head(10))
+
+df_train.rename(columns={'weathersit': 'weather',  # renaming columns to improve readability
+                         'mnth': 'month',
+                         'hr': 'hour',
+                         'yr': 'year',
+                         'hum': 'humidity',
+                         'cnt': 'count'}, inplace=True)
+
+one_hot_columns = list(df_train.columns)  # getting all columns
+pure_columns = ['temp', 'humidity', 'count']  # these are not categorical columns
+one_hot_columns = [x for x in one_hot_columns if x not in pure_columns]  # excluding non-cat columns
+for column in one_hot_columns:
+    df_train = pd.concat([df_train.drop(column, axis=1), pd.get_dummies(df_train[column], prefix=column)],
+                         axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
+
+print(df_train.head(10))
+# Training
+all_columns = list(df_train.columns)
+# Training and test data is created by splitting the main data. 30% of test data is considered
+train_columns = ['temp', 'humidity', 'workingday']
+X = df_train[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
+y = df_train['count']
+>>>>>>> 484eaecff2045f84f11aa58e15fb8bb9e278ef06
 
 #%%
 
+<<<<<<< HEAD
+=======
+# ->Prediction
+clf = LinearRegression()
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+# print(y_pred)
+>>>>>>> 484eaecff2045f84f11aa58e15fb8bb9e278ef06
