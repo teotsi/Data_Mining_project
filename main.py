@@ -40,40 +40,6 @@ df_train['weekday'] = df_train.weekday.astype('category')
 df_train['workingday'] = df_train.workingday.astype('category')
 df_train['weather'] = df_train.weather.astype('category')
 
-
-# #print(df_train.dtypes)
-# fig,[ax1,ax2,ax3,ax4,ax5,ax6,ax7,ax8] = plt.subplots(nrows=8, figsize=(15,25))
-# sn.barplot(x = df_train['season'], y = df_train['count'],ax = ax1)
-# sn.barplot(x = df_train['year'], y = df_train['count'],ax = ax2)
-# sn.barplot(x = df_train['month'], y = df_train['count'],ax = ax3)
-# sn.barplot(x = df_train['hour'], y = df_train['count'],ax = ax4)
-# sn.barplot(x = df_train['holiday'], y = df_train['count'],ax = ax5)
-# sn.barplot(x = df_train['weekday'], y = df_train['count'],ax = ax6)
-# sn.barplot(x = df_train['workingday'], y = df_train['count'],ax = ax7)
-# sn.barplot(x = df_train['weather'], y = df_train['count'],ax = ax8)
-
-
-# # Regression plot is used to verify if a pattern can be observed between `count` and numerical variables
-# fig,[ax1,ax2,ax3] = plt.subplots(ncols = 3, figsize = (20,8))
-# plt.rc('xtick', labelsize=10) 
-# plt.rc('ytick', labelsize=10) 
-
-# sn.regplot(x = 'temp', y = 'count',data = df_train, ax = ax1)
-# ax1.set(title="Relation between temperature and count")
-# sn.regplot(x = 'humidity', y = 'count',data = df_train, ax = ax2)
-# ax2.set(title="Relation between humidity and total count")
-# sn.regplot(x = 'windspeed', y = 'count',data = df_train, ax = ax3)
-# ax3.set(title="Relation between windspeed and count")
-
-
-# #Correlation analysis
-# data_corr = df_train[['temp', 'atemp', 'humidity', 'windspeed', 'casual', 'registered', 'count']].corr()
-# mask = np.array(data_corr)
-# mask[np.tril_indices_from(mask)] = False
-# fig = plt.subplots(figsize=(15,10))
-# sn.heatmap(data_corr, mask=mask, vmax=1, square=True, annot=True, cmap="YlGnBu")
-
-
 print(df_train.head(10))
 
 
@@ -96,6 +62,7 @@ df_test['workingday'] = df_test.workingday.astype('category')
 df_test['weather'] = df_test.weather.astype('category')
 
 df_test = df_test.drop(['atemp', 'windspeed'], axis=1) #dropping cols
+print(df_test.weather.unique())
 
 one_hot_columns = list(df_test.columns)  # getting all columns
 non_categorical_columns = ['temp', 'humidity', 'count']  # these are not categorical columns
@@ -103,8 +70,6 @@ one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_column
 for column in one_hot_columns:
     df_test = pd.concat([df_test.drop(column, axis=1), pd.get_dummies(df_test[column], prefix=column)],
                          axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
-
-print (df_test.head(10))
 
 df_train = df_train.drop(['atemp', 'casual', 'registered', 'windspeed'], axis=1)
 # print(df_train.head(10))
@@ -139,3 +104,16 @@ for i, y  in enumerate(y_pred):
 
 print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
 print('R2:', r2_score(y_test, y_pred))
+
+print (df_test.head(5))
+df_test['weather_4']=0
+df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
+y_pred = clf.predict(df_test)
+for i, y  in enumerate(y_pred):
+    if y_pred[i] < 0:
+        y_pred[i] = 0
+
+submission = pd.DataFrame()
+submission['Id'] = range(y_pred.shape[0])
+submission['Predicted'] = y_pred
+submission.to_csv("submission.csv", index=False)
