@@ -14,7 +14,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression, Lasso, HuberRegressor, ElasticNet, ElasticNetCV, \
+    Lars, LarsCV, LogisticRegressionCV
 from sklearn.metrics.regression import mean_squared_log_error, r2_score
 
 filename = 'Data_Mining_project/train.csv'
@@ -94,8 +95,8 @@ y = df_train['count']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # ->Prediction
-clf = LinearRegression()
-clf.fit(X_train, y_train)
+clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
+clf.fit(X, y)
 y_pred = clf.predict(X_test)
 # print(y_pred)
 for i, y  in enumerate(y_pred):
@@ -105,7 +106,7 @@ for i, y  in enumerate(y_pred):
 print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
 print('R2:', r2_score(y_test, y_pred))
 
-print (df_test.head(5))
+# print (df_test.head(5))
 df_test['weather_4']=0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
 y_pred = clf.predict(df_test)
