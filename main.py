@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn import svm
 from sklearn.metrics.regression import mean_squared_log_error, r2_score
 # matplotlib inline
 # from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -41,11 +43,11 @@ def read_data(filename):
     return df
 
 
-filename = 'Project/train.csv'
+filename = 'train.csv'
 df_train = read_data(filename)
 # print(df_train.head(10))
 
-df_test = read_data('Project/test.csv')  # reading test file
+df_test = read_data('test.csv')  # reading test file
 # print(df_test.head(10))
 
 # print(df_train.head(10))
@@ -58,11 +60,15 @@ X = df_train[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # 
 # print(X)
 y = df_train['count']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, train_size=0.1, random_state=42)
 
-# ->Prediction
-clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
-clf.fit(X, y)
+# #->Prediction
+# clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
+# clf.fit(X_train, y_train)
+parameters = {'kernel':('linear', 'rbf'), 'C':[1, 5]}
+svc = svm.SVC(gamma="scale")
+clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1,verbose=3)
+clf.fit(X,y)
 y_pred = clf.predict(X_test)
 # print(y_pred)
 for i, y in enumerate(y_pred):
@@ -83,4 +89,4 @@ for i, y in enumerate(y_pred):
 submission = pd.DataFrame()
 submission['Id'] = range(y_pred.shape[0])
 submission['Predicted'] = y_pred
-submission.to_csv("Project/submission.csv", index=False)
+submission.to_csv("submission.csv", index=False)
