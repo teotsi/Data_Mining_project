@@ -65,10 +65,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, train_s
 # #->Prediction
 # clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
 # clf.fit(X_train, y_train)
-parameters = {'kernel':('linear', 'rbf'), 'C':[1, 5]}
+parameters = {'kernel':('linear', 'poly', 'rbf'), 'C':[1,2,5]}
 svc = svm.SVC(gamma="scale")
 clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1,verbose=3)
-clf.fit(X,y)
+clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 # print(y_pred)
 for i, y in enumerate(y_pred):
