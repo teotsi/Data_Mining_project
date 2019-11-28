@@ -76,7 +76,9 @@ for i, y in enumerate(y_pred):
 
 print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
 print('R2:', r2_score(y_test, y_pred))
-
+print('Best C:', clf.best_estimator_.C)
+print('Best Kernel:', clf.best_estimator_.kernel)
+print('Best Gamma:', clf.best_estimator_.gamma)
 # print (df_test.head(5))
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
