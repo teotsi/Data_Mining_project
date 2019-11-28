@@ -4,8 +4,9 @@ from sklearn import svm
 from sklearn.metrics.regression import mean_squared_log_error, r2_score
 from sklearn.model_selection import GridSearchCV
 # matplotlib inline
-from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import Lasso
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import BaggingRegressor
 
 
 
@@ -43,15 +44,15 @@ def read_data(filename):
     return df
 
 
-filename = 'Project/train.csv'
+filename = 'train.csv'
 df_train = read_data(filename)
 # print(df_train.head(10))
 
-df_test = read_data('Project/test.csv')  # reading test file
+df_test = read_data('test.csv')  # reading test file
 # print(df_test.head(10))
 
 # print(df_train.head(10))
-print(df_train.head(10))
+#print(df_train.head(10))
 # Training
 all_columns = list(df_train.columns)
 # Training and test data is created by splitting the main data. 30% of test data is considered
@@ -62,19 +63,28 @@ y = df_train['count']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,random_state=42)
 
-reg = SGDRegressor(alpha=0.0001, average=False, early_stopping=False,
-       epsilon=0.1, eta0=0.01, fit_intercept=True, l1_ratio=0.15,
-       learning_rate='invscaling', loss='squared_loss', max_iter=1000,
-       n_iter_no_change=5, penalty='l2', power_t=0.25, random_state=None,
-       shuffle=True, tol=0.001, validation_fraction=0.1, verbose=0,
-       warm_start=False)
+reg = Lasso(alpha=0.03, copy_X=True, fit_intercept=False, max_iter=1000,
+   normalize=False, positive=False, precompute=False, random_state=None,
+   selection='cyclic', tol=0.0001, warm_start=False)
 reg.fit(X,y)
 prediction = reg.predict(X_test)
 print(reg.score(X_test, y_test))
 
-params = {'alpha': [i/1000 for i in range(1,20)], 'l1_ratio': [i/100 for i in range(1,20)]}
-reg_test = GridSearchCV(estimator=reg, cv=5 , param_grid = params, n_jobs=-1)
+reg_bag = BaggingRegressor(reg)
+reg_bag.fit(X,y)
+
+
+params = {'n_estimators': [10,15,20]}
+#
+# 'selection': ['cyclic', 'random'],
+#           'tol': [i/100 for i in range(1,10)]
+reg_test = GridSearchCV(estimator=reg_bag, cv=5 , param_grid = params, n_jobs=-1)
 reg_test.fit(X,y)
+
+# print('Best precompute:', reg_test.best_estimator_.precompute)
+# print('Best alpha:', reg_test.best_estimator_.alpha)
+# print('Best selection:', reg_test.best_estimator_.selection)
+# print('Best tol:', reg_test.best_estimator_.tol)
 
 y_pred = reg_test.predict(X_test)
 # print(y_pred)
