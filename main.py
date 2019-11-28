@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
 from sklearn import svm
 from sklearn.metrics.regression import mean_squared_log_error, r2_score
+from sklearn.model_selection import GridSearchCV
 # matplotlib inline
 # from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -65,10 +64,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, train_s
 # #->Prediction
 # clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
 # clf.fit(X_train, y_train)
-parameters = {'kernel':('linear', 'poly', 'rbf'), 'C':[1,2,5]}
+parameters = {'kernel': ('linear', 'poly', 'rbf'), 'C': [1, 2, 5, 100], 'gamma': [1e-3, 1e-4]}
 svc = svm.SVC(gamma="scale")
-clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1,verbose=3)
-clf.fit(X_train,y_train)
+clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1, verbose=3)
+clf.fit(X, y)
 y_pred = clf.predict(X_test)
 # print(y_pred)
 for i, y in enumerate(y_pred):
