@@ -1,16 +1,9 @@
 import numpy as np
-import pandas as pd
-from sklearn import svm
-from sklearn.metrics.regression import mean_squared_log_error, r2_score
-from sklearn.model_selection import GridSearchCV
-# matplotlib inline
-from sklearn.linear_model import Lasso
+import pandas as pd 
+import tensorflow as tf
+import keras
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import BaggingRegressor
-from sklearn.neural_network import MLPRegressor
-
-
-
+from keras.layers.core import Dense
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -48,13 +41,10 @@ def read_data(filename):
 
 filename = 'train.csv'
 df_train = read_data(filename)
-# print(df_train.head(10))
+
 
 df_test = read_data('test.csv')  # reading test file
-# print(df_test.head(10))
 
-# print(df_train.head(10))
-#print(df_train.head(10))
 # Training
 all_columns = list(df_train.columns)
 # Training and test data is created by splitting the main data. 30% of test data is considered
@@ -63,20 +53,24 @@ X = df_train[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # 
 # print(X)
 y = df_train['count']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,random_state=42)
 
-reg = MLPRegressor(hidden_layer_sizes=(100, 80, 60, 40, 20), activation='relu',
-                    solver='lbfgs', alpha=0.0001, verbose=False)
-reg.fit(X,y)
-prediction = reg.predict(X_test)
-print(reg.score(X_test, y_test))
+#Creating the split
+X_train = X.sample(frac=0.8, random_state=42)
+X_test = X.drop(X_train.index)
 
+y_train = y.sample(frac=0.8, random_state=42)
+y_test = y.drop(y_train.index)
 
-y_pred = reg.predict(X_test)
-# print(y_pred)
-for i, y in enumerate(y_pred):
-    if y_pred[i] < 0:
-        y_pred[i] = 0
+model = keras.Sequential([
+    keras.layers.Dense(100, activation="relu", input_shape=(X_train.shape())),
+    keras.layers.Dense(40, activation='relu'),
+    keras.layers.Dense(20, activation='relu')
+])
 
-print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
-print('R2:', r2_score(y_test, y_pred))
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+model.fit(X_train,y_train, epochs=5)
+
+test_loss, test_acc = model.evaluate(X_test, y_test)
+
+print('Tested:', test_acc)
