@@ -43,7 +43,7 @@ def read_data(filename):
 
 
 filename = 'Project/train.csv'
-df_train = read_data(filename)
+df_train =read_data(filename)
 # print(df_train.head(10))
 
 df_test = read_data('Project/test.csv')  # reading test file
