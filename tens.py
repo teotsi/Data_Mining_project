@@ -60,9 +60,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 #print(X_train.shape, X_val.shape, X_test.shape, y_train.shape, y_val.shape, y_test.shape)
 
 model = Sequential([
-    Dense(32, activation='relu', input_shape=(57,)),
-    Dense(32, activation='relu'),
-    Dense(1, activation='sigmoid')
+    Dense(100, activation='relu', input_shape=(57,)),
+    Dense(40, activation='relu'),
+    Dense(20, activation='relu')
 ])
 
 model.compile(optimizer='adam',
