@@ -56,7 +56,9 @@ y = df_train['count']
 
 
 #Creating the split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+X_train, X_val_and_test, y_train, y_val_and_test = train_test_split(X, y, test_size=0.3, random_state=42)
+X_val, X_test, y_val, y_test=train_test_split(X_val_and_test, y_val_and_test, test_size=0.5, random_state=42)
+
 #print(X_train.shape, X_val.shape, X_test.shape, y_train.shape, y_val.shape, y_test.shape)
 
 model = Sequential([
@@ -69,5 +71,8 @@ model.compile(optimizer='adam',
               loss='mean_squared_logarithmic_error',
               metrics=['mean_squared_logarithmic_error'])
 
-hist=model.fit(X_train, y_train, epochs=100,
-               validation_data=(X_test,y_test))
+hist=model.fit(X_train, y_train,epochs=100,
+               validation_data=(X_val,y_val))
+
+predictions=model.predict(X_test)
+print(predictions.typeof)
