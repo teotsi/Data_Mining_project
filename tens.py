@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd 
 import tensorflow as tf
-import keras
+from tensorflow import keras
 from sklearn.model_selection import train_test_split
-from keras.layers.core import Dense
+from tensorflow_core.python.keras.layers.core import Dense
+from tensorflow_core.python.keras.models import Sequential
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -55,22 +56,18 @@ y = df_train['count']
 
 
 #Creating the split
-X_train = X.sample(frac=0.8, random_state=42)
-X_test = X.drop(X_train.index)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+#print(X_train.shape, X_val.shape, X_test.shape, y_train.shape, y_val.shape, y_test.shape)
 
-y_train = y.sample(frac=0.8, random_state=42)
-y_test = y.drop(y_train.index)
-
-model = keras.Sequential([
-    keras.layers.Dense(100, activation="relu", input_shape=(X_train.shape())),
-    keras.layers.Dense(40, activation='relu'),
-    keras.layers.Dense(20, activation='relu')
+model = Sequential([
+    Dense(32, activation='relu', input_shape=(57,)),
+    Dense(32, activation='relu'),
+    Dense(1, activation='sigmoid')
 ])
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam',
+              loss='mean_squared_logarithmic_error',
+              metrics=['mean_squared_logarithmic_error'])
 
-model.fit(X_train,y_train, epochs=5)
-
-test_loss, test_acc = model.evaluate(X_test, y_test)
-
-print('Tested:', test_acc)
+hist=model.fit(X_train, y_train, epochs=100,
+               validation_data=(X_test,y_test))
