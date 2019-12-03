@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from tensorflow_core.python.keras.layers.core import Dense
+from tensorflow_core.python.keras.layers.recurrent import LSTM
 from tensorflow_core.python.keras.models import Sequential
 
 pd.set_option('display.max_columns', 100)
@@ -68,14 +69,14 @@ model = Sequential([
     Dense(100, activation='relu', input_shape=(57,)),
     Dense(40, activation='relu'),
     Dense(20, activation='relu'),
+    LSTM(128, input_shape=(20,57)),
     Dense(1, activation='relu')
 ])
-
 model.compile(optimizer='adam',
               loss='mean_squared_logarithmic_error',
               metrics=['mean_squared_logarithmic_error'])
 
-hist = model.fit(X, y, epochs=2000)
+hist = model.fit(X, y, epochs=100)
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
 test_array = df_test.to_numpy()
