@@ -69,7 +69,6 @@ model = Sequential([
     Dense(100, activation='relu', input_shape=(57,)),
     Dense(40, activation='relu'),
     Dense(20, activation='relu'),
-    LSTM(128, input_shape=(20,57)),
     Dense(1, activation='relu')
 ])
 model.compile(optimizer='adam',
