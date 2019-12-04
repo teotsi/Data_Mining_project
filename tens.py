@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from numpy import dstack
+from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPRegressor
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from tensorflow_core.python.keras.layers.core import Dense
@@ -85,7 +88,21 @@ for i, y in enumerate(individual_predictions):
     if individual_predictions[i] < 0:
         individual_predictions[i] = 0
 
+neural=MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=True)
+neural.fit(X,y)
+mlp_predictions=neural.predict(df_test)
+for i, y in enumerate(mlp_predictions):
+    if mlp_predictions[i] < 0:
+        mlp_predictions[i] = 0
+
+full_set = dstack((individual_predictions,mlp_predictions))
+
+ensemble_model = LogisticRegression()
+ensemble_model.fit(full_set, y)
+
+final_prediction = ensemble_model.predict(test_array)
+
 submission = pd.DataFrame()
-submission['Id'] = range(len(individual_predictions))
-submission['Predicted'] = individual_predictions
+submission['Id'] = range(len(final_prediction))
+submission['Predicted'] = final_prediction
 submission.to_csv("submission.csv", index=False)
