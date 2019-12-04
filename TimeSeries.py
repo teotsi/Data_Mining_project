@@ -17,20 +17,23 @@ from tqdm import tqdm_notebook
 
 from itertools import product
 
+
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-import warnings
-warnings.filterwarnings('ignore')
 
+import warnings
+
+warnings.filterwarnings('ignore')
 # %matplotlib inline
 
 DATAPATH = 'train.csv'
 
 data = pd.read_csv(DATAPATH)
-data=data[['cnt']]
+data = data[['cnt']]
 print(data.head(10))
 X_train, X_test = train_test_split(data, test_size=0.7, random_state=42)
+
 
 # plt.figure(figsize=(17, 8))
 # plt.plot(data.head(100))
@@ -60,6 +63,7 @@ def plot_moving_average(series, window, plot_intervals=False, scale=1.96):
     plt.plot(series[window:], label='Actual values')
     plt.legend(loc='best')
     plt.grid(True)
+
 
 # # Here we use moving average
 # # Smooth by the previous 5 days (by week)
@@ -124,6 +128,7 @@ def optimize_SARIMA(parameters_list, d, D, s):
 
     return result_table
 
+
 print('second sarima')
 result_table = optimize_SARIMA(parameters_list, d, D, s)
 
@@ -132,7 +137,7 @@ p, q, P, Q = result_table.parameters[0]
 print('third sarima')
 best_model = sm.tsa.statespace.SARIMAX(X_train.head(100).cnt, order=(p, d, q),
                                        seasonal_order=(P, D, Q, s)).fit(disp=-1)
-x_pred=best_model.predict()
+x_pred = best_model.predict()
 for i, y in enumerate(x_pred):
     if x_pred[i] < 0:
         x_pred[i] = 0
