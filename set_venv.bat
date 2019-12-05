@@ -1,3 +1,4 @@
-python3 -m venv D:\PythonVenvs\Data_Mining_project
-D:\PythonVenvs\Data_Mining_project\Scripts\Activate
-python3 -m pip install requirements.txt
+python3 -m venv D:\PythonVenvs\Tensorflow_venv
+CALL D:\PythonVenvs\Tensorflow_venv\Scripts\Activate
+python -m pip install -r requirements.txt
+pause()

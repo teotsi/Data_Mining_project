@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 def read_data(filename):
     df = pd.read_csv(filename)
     df.rename(columns={'weathersit': 'weather',
@@ -28,3 +30,7 @@ def read_data(filename):
                        axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
 
     return df
+
+
+def transform_list(list):
+    return list[0]
