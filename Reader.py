@@ -1,5 +1,6 @@
 import pandas as pd
-
+from sklearn.metrics import r2_score, mean_squared_log_error
+import numpy as np
 
 def read_data(filename):
     df = pd.read_csv(filename)
@@ -34,3 +35,13 @@ def read_data(filename):
 
 def transform_list(list):
     return list[0]
+
+
+def bring_to_zero(list):
+    for i, y in enumerate(list):
+        if list[i] < 0:
+            list[i] = 0
+
+def print_scores(name, test_set, test_data):
+    print('RMSLE for',name ,':', np.sqrt(mean_squared_log_error(test_set, test_data)))
+    print('R2 for',name,':', r2_score(test_set, test_data), '\n')

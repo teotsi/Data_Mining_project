@@ -8,7 +8,7 @@ from Reader import *
 
 def sequential_nn_model(X_train, y_train):
     model = Sequential([
-        Dense(100, activation='relu', input_shape=(57,)),
+        Dense(100, activation='relu', input_shape=(X_train.shape[1],)),
         Dense(40, activation='relu'),
         Dense(20, activation='relu'),
         Dense(1, activation='relu')

@@ -35,7 +35,7 @@ Seq_NN = sequential_nn_model(X_train, y_train)
 
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
-df_test = df_test.drop(columns=['weather_4'])
+# df_test = df_test.drop(columns=['weather_4'])
 
 test_array=df_test.to_numpy()
 predictions=Seq_NN.predict(test_array)
