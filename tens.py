@@ -91,7 +91,7 @@ hist = model.fit(X, y, epochs=100)
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
 df_test=df_test.drop(columns=['weather_4'])
-print(df_test.columns)
+# print(df_test.columns)
 df_test_og= deepcopy(df_test)
 test_array = df_test.to_numpy()
 predictions = model.predict(test_array)
