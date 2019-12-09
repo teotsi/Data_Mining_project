@@ -138,11 +138,9 @@ print('third sarima')
 best_model = sm.tsa.statespace.SARIMAX(X_train.head(24), order=(p, d, q),
                                        seasonal_order=(P, D, Q, s)).fit(disp=-1)
 x_pred = best_model.predict()
-for i, y in enumerate(x_pred):
-    print(i,y)
-    if y < 0.0:
-        x_pred[i] = 0.0
-print(x_pred.array[0])
+x_pred[x_pred<0]=0
+#print(x_pred)
+
 print('RMSLE:', np.sqrt(mean_squared_log_error(X_test.head(24), x_pred)))
 print('R2:', r2_score(X_test.head(24), x_pred))
 print(best_model.summary())
