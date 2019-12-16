@@ -45,8 +45,8 @@ for i, y in enumerate(individual_predictions):
     if individual_predictions[i] < 0:
         individual_predictions[i] = 0
 
-print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, individual_predictions)))
-print('R2:', r2_score(y_test, individual_predictions))
+# print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, individual_predictions)))
+# print('R2:', r2_score(y_test, individual_predictions))
 
 # reg_bag = BaggingRegressor(reg)
 # reg_bag.fit(X, y)
