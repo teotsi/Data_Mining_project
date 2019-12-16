@@ -5,7 +5,6 @@ import tensorflow as tf
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from sklearn import preprocessing
-from keras.layers.core import Dropout
 
 def read_data(df):
     #df = pd.read_csv(filename)
