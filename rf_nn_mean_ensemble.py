@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-
+import xgboost as xgb
 from Reader import *
 
 # reading data without one-hot encoding, since that's optimal for RF
@@ -27,20 +27,14 @@ rf_pred = rf.predict(df_test)
 df = read_data('train.csv')
 df_test = read_data('test.csv')
 
-all_columns = list(df.columns)
-# Training and test data is created by splitting the main data. 30% of test data is considered
-train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather', 'temp', 'humidity',
-                 'windspeed']
-X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
-y = df['count']
+X, y = select_train_columns(df)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 nn = sequential_nn_model(X, y)
 
 df_test['weather_4'] = 0
-df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
-
+df_test = select_train_columns(df_test)[0]
 nn_pred = nn.predict(df_test.to_numpy())
 # print_scores("Neural Network", y_test, nn_pred)
 nn_pred = [transform_list_item(x) for x in nn_pred]
@@ -50,7 +44,11 @@ print(merged_pred.head(5))
 # getting the mean
 mean_pred = pd.DataFrame()
 mean_pred['avg'] = merged_pred.mean(axis=1)
-print(mean_pred['avg'].head(5))
 
 # print_scores("mean predictions",y_test, mean_pred.to_numpy())
 create_submission(mean_pred)
+#
+# xgb_regressor = xgb.XGBRegressor(verbosity=3,)
+# xgb_regressor.fit(X,y)
+# xgb_pred = xgb_regressor.predict(df_test)
+# create_submission(xgb_pred)
