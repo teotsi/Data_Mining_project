@@ -7,7 +7,7 @@ from tensorflow_core.python.keras.models import Sequential
 from sklearn import preprocessing
 
 
-def read_data(input, is_dataframe=False):
+def read_data(input, is_dataframe=False, one_hot=True):
     if not is_dataframe:
         df = pd.read_csv(input)
     else:
@@ -36,12 +36,13 @@ def read_data(input, is_dataframe=False):
 
     df = df.drop(columns_to_remove, axis=1)
 
-    # one_hot_columns = list(df.columns)  # getting all columns
-    # non_categorical_columns = ['temp', 'count','windspeed','humidity']  # these are not categorical columns
-    # one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
-    # for column in one_hot_columns:
-    #     df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
-    #                    axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
+    if one_hot:
+        one_hot_columns = list(df.columns)  # getting all columns
+        non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity']  # these are not categorical columns
+        one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
+        for column in one_hot_columns:
+            df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
+                           axis=1)  # creating one hot encoded columns, adding them to dataset, removing original column
 
     return df
 
@@ -76,7 +77,7 @@ def bring_to_zero(list):
 
 def sequential_nn_model(X_train, y_train):
     model = Sequential([
-        Dense(100, activation='relu', input_shape=(X_train.shape[1],), batch_size=6),
+        Dense(100, activation='relu', input_shape=(X_train.shape[1],)),
 
         Dense(40, activation='relu'),
 
