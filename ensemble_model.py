@@ -61,7 +61,7 @@ print_scores('Lasso', y_test, Lasso_pred)
 #Tensorflow Neural Network
 Seq_NN = sequential_nn_model(X_train,y_train)
 NN_pred = Seq_NN.predict(X_test)
-individual_NN_pred = [transform_list(x) for x in NN_pred]
+individual_NN_pred = [transform_list_item(x) for x in NN_pred]
 bring_to_zero(individual_NN_pred)
 
 print_scores('Sequential Neural Network', y_test, individual_NN_pred)

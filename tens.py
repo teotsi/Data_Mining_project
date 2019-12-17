@@ -60,7 +60,7 @@ if __name__=='__main__':
     print(df_test.columns)
     test_array = df_test.to_numpy()
     predictions = model.predict(test_array)
-    individual_predictions = [transform_list(x) for x in predictions]
+    individual_predictions = [transform_list_item(x) for x in predictions]
     for i, y in enumerate(individual_predictions):
         if individual_predictions[i] < 0:
             individual_predictions[i] = 0

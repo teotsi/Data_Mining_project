@@ -122,7 +122,7 @@ print('Mean squared log error: %.3f' % acc)
 # test_array = df_test.to_numpy()
 # predictions=NNmodel.predict(test_array)
 
-individual_predictions = [Reader.transform_list(x) for x in yhat]
+individual_predictions = [Reader.transform_list_item(x) for x in yhat]
 for i, y in enumerate(individual_predictions):
     if individual_predictions[i] < 0:
         individual_predictions[i] = 0

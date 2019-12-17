@@ -1,10 +1,9 @@
-import pandas as pd
-from sklearn.metrics import r2_score, mean_squared_log_error
 import numpy as np
-import tensorflow as tf
+import pandas as pd
+from sklearn import preprocessing
+from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
-from sklearn import preprocessing
 
 
 def read_data(input, is_dataframe=False, one_hot=True):
@@ -47,6 +46,21 @@ def read_data(input, is_dataframe=False, one_hot=True):
     return df
 
 
+# removes unwanted columns and selects one-hot encoded versions of wanted ones
+def select_train_columns(df, train_columns=None):
+    all_columns = list(df.columns)
+    if train_columns is None:  # if we want, we can specify which columns we want
+        train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
+                         'temp', 'humidity',
+                         'windspeed']
+    X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
+    if 'count' in all_columns:  # if used for train set, we need to return the results too
+        y = df['count']
+    else:
+        y = None
+    return X, y
+
+
 # Normalizes the given column
 def normalizer(column, df):
     x = df[[column]].values.astype(float)
@@ -65,7 +79,7 @@ def normalizer(column, df):
     return x_scaled
 
 
-def transform_list(list):
+def transform_list_item(list):
     return list[0]
 
 
