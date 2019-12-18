@@ -83,7 +83,7 @@ def transform_list_item(list):
     return list[0]
 
 
-def bring_to_zero(list):
+def bring_to_zero(list): #negative rental numbers don't exist, so we set them to 0
     for i, y in enumerate(list):
         if list[i] < 0:
             list[i] = 0
@@ -103,7 +103,7 @@ def sequential_nn_model(X_train, y_train):
                   loss='mean_squared_logarithmic_error',
                   metrics=['mean_squared_logarithmic_error'])
 
-    hist = model.fit(X_train, y_train, epochs=20)
+    hist = model.fit(X_train, y_train, epochs=50)
     return model
 
 
