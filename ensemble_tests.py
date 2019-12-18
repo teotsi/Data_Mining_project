@@ -1,14 +1,17 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
+from sklearn.linear_model import Ridge, LogisticRegression
 from sklearn.metrics import mean_squared_log_error
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
 import Reader
-from sklearn.ensemble import IsolationForest, VotingRegressor, StackingRegressor, AdaBoostRegressor
+from sklearn.ensemble import IsolationForest, VotingRegressor, StackingRegressor, AdaBoostRegressor, \
+    RandomForestRegressor
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -46,8 +49,8 @@ df[['hum']] = train_humidity_scaled
 df_test[['windspeed']] = test_wind_scaled
 df_test[['hum']] = test_humidity_scaled
 
-df = Reader.read_data(df)
-df_test = Reader.read_data(df_test)
+df = Reader.read_data(df, is_dataframe=True)
+df_test = Reader.read_data(df_test, is_dataframe=True)
 
 #Training
 df = df.drop(columns=['weather_4'])
@@ -73,12 +76,16 @@ for i in range(X.shape[0]):
 
 # NNmodel = Reader.sequential_nn_model(X, y)
 
-knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=8, weights='distance', p=1)
-dt = DecisionTreeRegressor(random_state=0, max_depth=16, min_samples_leaf=4)
-neural=MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=True, max_iter=250)
-ada=AdaBoostRegressor(base_estimator=neural, random_state=0, n_estimators=10)
+knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
+dt = DecisionTreeRegressor(random_state=0)
+mlp=MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=True, max_iter=300)
+# rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=400, random_state=0)
+adadt=AdaBoostRegressor(base_estimator=dt, random_state=0, n_estimators=10)
+adaknn=AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
+# ada.fit(X_train,y_train)
+# pred=ada.predict(X_test)
 # Voting
-voting = StackingRegressor(estimators=[('knn', knn), ('dt', dt), ("ada", ada)], n_jobs=-1)
+voting = StackingRegressor(estimators=[('knn', adaknn), ('dt', adadt), ("mlp", mlp)], n_jobs=-1)
 voting.fit(X_train, y_train)
 y_pred_voting = voting.predict(X_test)
 
@@ -90,5 +97,6 @@ def rmsle_score(y_true, y_pred):
     return np.sqrt(mean_squared_log_error(y_true, y_pred))
 
 print('Voting RMSLE score:', rmsle_score(y_test, y_pred_voting))
+# print('Voting RMSLE score:', rmsle_score(y_test, y_pred_voting))
 
 
