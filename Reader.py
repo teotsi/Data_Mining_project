@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
+from keras import backend as K
 from sklearn import preprocessing
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
+from tensorflow_core.python.ops.gen_math_ops import log1p
 
 
 def read_data(input, is_dataframe=False, one_hot=True):
@@ -83,7 +85,7 @@ def transform_list_item(list):
     return list[0]
 
 
-def bring_to_zero(list): #negative rental numbers don't exist, so we set them to 0
+def bring_to_zero(list):  # negative rental numbers don't exist, so we set them to 0
     for i, y in enumerate(list):
         if list[i] < 0:
             list[i] = 0
@@ -99,8 +101,8 @@ def sequential_nn_model(X_train, y_train):
 
         Dense(1, activation='relu')
     ])
-    model.compile(optimizer='adam',
-                  loss='mean_squared_logarithmic_error',
+    model.compile(optimizer='nadam',
+                  loss=rmsle,
                   metrics=['mean_squared_logarithmic_error'])
 
     hist = model.fit(X_train, y_train, epochs=50)
@@ -117,3 +119,9 @@ def create_submission(predictions):
 def print_scores(name, test_set, predictions):
     print('RMSLE for', name, ':', np.sqrt(mean_squared_log_error(test_set, predictions)))
     print('R2 for', name, ':', r2_score(test_set, predictions), '\n')
+
+
+def rmsle(y, y0):
+    return K.sqrt(K.mean(K.square(log1p(y) - log1p(y0))))
+
+

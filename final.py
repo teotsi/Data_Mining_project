@@ -59,7 +59,7 @@ for i in range(n_members):
 	# fit model
 	model = Reader.sequential_nn_model(X_train, y_train)
 	# save model
-	filename = 'models/model_' + str(i + 1) + '.h5'
+	filename = 'model_' + str(i + 1) + '.h5'
 	model.save(filename)
 	print('>Saved %s' % filename)
 
@@ -67,7 +67,7 @@ def load_all_models(n_models):
 	all_models = list()
 	for i in range(n_models):
 		# define filename for this ensemble
-		filename = 'models/model_' + str(i + 1) + '.h5'
+		filename = 'model_' + str(i + 1) + '.h5'
 		# load model from file
 		model = tf.keras.models.load_model(filename)
 		# add to list of members
@@ -122,12 +122,11 @@ print('Mean squared log error: %.3f' % acc)
 # test_array = df_test.to_numpy()
 # predictions=NNmodel.predict(test_array)
 
-individual_predictions = [Reader.transform_list_item(x) for x in yhat]
-for i, y in enumerate(individual_predictions):
-    if individual_predictions[i] < 0:
-        individual_predictions[i] = 0
+for i, y in enumerate(yhat):
+    if yhat[i] < 0:
+        yhat[i] = 0
 
 submission = pd.DataFrame()
-submission['Id'] = range(len(individual_predictions))
-submission['Predicted'] = individual_predictions
+submission['Id'] = range(len(yhat))
+submission['Predicted'] = yhat
 submission.to_csv("submission.csv", index=False)
