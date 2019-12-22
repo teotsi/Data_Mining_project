@@ -61,9 +61,11 @@ all_columns = list(df.columns)
 train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather', 'temp', 'humidity',
                  'windspeed']
 X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
-y = df['count']
+y = df['casual']
+z = df['registered']
+c = df['count']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test, z_train, z_test, c_train, c_test = train_test_split(X, y, z, c, test_size=0.3, random_state=42)
 
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
 
@@ -76,14 +78,16 @@ for i in range(X.shape[0]):
     if pred_outlier[i] == -1:
         X = X.drop([i])
         y = y.drop([i])
+        z = z.drop([i])
 
 # NNmodel = Reader.sequential_nn_model(X, y)
 
+# ------------------ Predict the casuals ---------------------------------
 knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
 dt = DecisionTreeRegressor(random_state=0)
-mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=True,
+mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=False,
                    max_iter=400)
-rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=400, random_state=0)
+rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=900, random_state=0)
 adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
 bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
 # rf.fit(X_train,y_train)
@@ -93,7 +97,21 @@ stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("rando
                              n_jobs=-1)
 stacking.fit(X_train, y_train)
 y_pred_stacking = stacking.predict(X_test)
+print(y_pred_stacking)
 
+# ------------------ Predict the registered ones -------------------------
+knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
+dt = DecisionTreeRegressor(random_state=0)
+mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=False,
+                   max_iter=400)
+rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=900, random_state=0)
+adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
+bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
+# -------------------- Stacking voting -----------------------------
+stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf), ("adaknn", adaknn)],
+                             n_jobs=-1)
+stacking.fit(X_train, z_train)
+z_pred_stacking = stacking.predict(X_test)
 
 # score function
 def rmsle_score(y_true, y_pred):
@@ -103,4 +121,7 @@ def rmsle_score(y_true, y_pred):
     return np.sqrt(mean_squared_log_error(y_true, y_pred))
 
 
-print('Stacking RMSLE score:', rmsle_score(y_test, y_pred_stacking))
+print('Stacking RMSLE score for casual:', rmsle_score(y_test, y_pred_stacking))
+print('Stacking RMSLE score for registered:', rmsle_score(z_test, z_pred_stacking))
+
+print('Stacking RMSLE score for count by adding casual and registered:', rmsle_score(c_test, np.add(z_pred_stacking,y_pred_stacking)))

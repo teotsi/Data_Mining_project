@@ -32,14 +32,15 @@ def read_data(input, is_dataframe=False, one_hot=True):
 
     columns = list(df.columns)
     columns_to_remove = ['atemp']
-    if 'casual' in columns:
-        columns_to_remove.extend(['casual', 'registered'])
+    # #------------------- try to calculate casual and registered and predict their sum -------------------------
+    # if 'count' in columns:
+    #     columns_to_remove.extend(['count'])
 
     df = df.drop(columns_to_remove, axis=1)
 
     if one_hot:
         one_hot_columns = list(df.columns)  # getting all columns
-        non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity']  # these are not categorical columns
+        non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity', 'casual', 'registered']  # these are not categorical columns
         one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
         for column in one_hot_columns:
             df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
