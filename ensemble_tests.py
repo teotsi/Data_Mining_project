@@ -83,32 +83,32 @@ for i in range(X.shape[0]):
 # NNmodel = Reader.sequential_nn_model(X, y)
 
 # ------------------ Predict the casuals ---------------------------------
-knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
+# knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
 dt = DecisionTreeRegressor(random_state=0)
 mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=False,
                    max_iter=400)
 rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=900, random_state=0)
-adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
+# adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
 bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
 # rf.fit(X_train,y_train)
 # pred=rf.predict(X_test)
 # -------------------- Stacking voting -----------------------------
-stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf), ("adaknn", adaknn)],
+stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf)],
                              n_jobs=-1)
 stacking.fit(X_train, y_train)
 y_pred_stacking = stacking.predict(X_test)
 print(y_pred_stacking)
 
 # ------------------ Predict the registered ones -------------------------
-knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
+# knn = KNeighborsRegressor(n_jobs=-1, n_neighbors=2, weights='distance', p=1)
 dt = DecisionTreeRegressor(random_state=0)
 mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=False,
                    max_iter=400)
 rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=900, random_state=0)
-adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
+# adaknn = AdaBoostRegressor(base_estimator=knn, random_state=0, n_estimators=9)
 bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
 # -------------------- Stacking voting -----------------------------
-stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf), ("adaknn", adaknn)],
+stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf)],
                              n_jobs=-1)
 stacking.fit(X_train, z_train)
 z_pred_stacking = stacking.predict(X_test)
