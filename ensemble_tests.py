@@ -9,7 +9,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
-import Reader
+from Reader import *
 from sklearn.ensemble import IsolationForest, VotingRegressor, StackingRegressor, AdaBoostRegressor, \
     RandomForestRegressor, BaggingRegressor
 
@@ -51,11 +51,11 @@ df[['hum']] = train_humidity_scaled
 df_test[['windspeed']] = test_wind_scaled
 df_test[['hum']] = test_humidity_scaled
 
-df = Reader.read_data(df, is_dataframe=True)
-df_test = Reader.read_data(df_test, is_dataframe=True)
+df = read_data(df, is_dataframe=True, one_hot=False)
+df_test = read_data(df_test, is_dataframe=True, one_hot=False)
 
 # Training
-df = df.drop(columns=['weather_4'])
+# df = df.drop(columns=['weather_4'])
 all_columns = list(df.columns)
 # Training and test data is created by splitting the main data. 30% of test data is considered
 train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather', 'temp', 'humidity',
@@ -95,8 +95,8 @@ bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
 # -------------------- Stacking voting -----------------------------
 stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf)],
                              n_jobs=-1)
-stacking.fit(X_train, y_train)
-y_pred_stacking = stacking.predict(X_test)
+stacking.fit(X, y)
+y_pred_stacking = stacking.predict(df_test)
 print(y_pred_stacking)
 
 # ------------------ Predict the registered ones -------------------------
@@ -110,8 +110,8 @@ bagdt = BaggingRegressor(base_estimator=dt, n_estimators=300, random_state=0)
 # -------------------- Stacking voting -----------------------------
 stacking = StackingRegressor(estimators=[('bagdt', bagdt), ("mlp", mlp), ("randomForest", rf)],
                              n_jobs=-1)
-stacking.fit(X_train, z_train)
-z_pred_stacking = stacking.predict(X_test)
+stacking.fit(X, z)
+z_pred_stacking = stacking.predict(df_test)
 
 # score function
 def rmsle_score(y_true, y_pred):
@@ -121,7 +121,9 @@ def rmsle_score(y_true, y_pred):
     return np.sqrt(mean_squared_log_error(y_true, y_pred))
 
 
-print('Stacking RMSLE score for casual:', rmsle_score(y_test, y_pred_stacking))
-print('Stacking RMSLE score for registered:', rmsle_score(z_test, z_pred_stacking))
+# print('Stacking RMSLE score for casual:', rmsle_score(y_test, y_pred_stacking))
+# print('Stacking RMSLE score for registered:', rmsle_score(z_test, z_pred_stacking))
+#
+# print('Stacking RMSLE score for count by adding casual and registered:', rmsle_score(c_test, np.add(z_pred_stacking,y_pred_stacking)))
 
-print('Stacking RMSLE score for count by adding casual and registered:', rmsle_score(c_test, np.add(z_pred_stacking,y_pred_stacking)))
+create_submission(np.add(z_pred_stacking,y_pred_stacking))
