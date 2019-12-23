@@ -40,7 +40,8 @@ def read_data(input, is_dataframe=False, one_hot=True):
 
     if one_hot:
         one_hot_columns = list(df.columns)  # getting all columns
-        non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity', 'casual', 'registered']  # these are not categorical columns
+        non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity', 'casual',
+                                   'registered']  # these are not categorical columns
         one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
         for column in one_hot_columns:
             df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
@@ -124,5 +125,3 @@ def print_scores(name, test_set, predictions):
 
 def rmsle(y, y0):
     return K.sqrt(K.mean(K.square(log1p(y) - log1p(y0))))
-
-

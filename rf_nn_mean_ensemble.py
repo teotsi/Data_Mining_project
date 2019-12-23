@@ -18,9 +18,9 @@ merged_pred = []
 # using Random Forest
 for i in range(5):
     rf = RandomForestRegressor(n_jobs=-1, max_depth=25, n_estimators=900, random_state=0)
-    rf.fit(X,y)
+    rf.fit(X, y)
     rf_pred = rf.predict(df_test)
-    merged_pred.append(pd.Series(rf_pred, name='pred_rf'+str(i)))
+    merged_pred.append(pd.Series(rf_pred, name='pred_rf' + str(i)))
 
 # print_scores("Random Forest", y_test, rf_pred)
 
@@ -38,10 +38,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 df_test['weather_4'] = 0
 df_test = select_train_columns(df_test)[0]
 for i in range(5):
-    nn = sequential_nn_model(X,y)  # fitting neural network model on X and y
+    nn = sequential_nn_model(X, y)  # fitting neural network model on X and y
     nn_pred = nn.predict(df_test.to_numpy())  # making prediction
     nn_pred = [transform_list_item(x) for x in nn_pred]
-    merged_pred.append(pd.Series(nn_pred, name='pred_nn'+str(i)))
+    merged_pred.append(pd.Series(nn_pred, name='pred_nn' + str(i)))
 # print_scores("Neural Network", y_test, nn_pred)
 
 # merging the results from each method in a single dataframe
