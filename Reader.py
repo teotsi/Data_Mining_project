@@ -50,15 +50,17 @@ def read_data(input, is_dataframe=False, one_hot=True):
 
 
 # removes unwanted columns and selects one-hot encoded versions of wanted ones
-def select_train_columns(df, train_columns=None):
+def select_train_columns(df, train_columns=None, pred_column=None):
+    if pred_column is None:
+        pred_column = 'count'
     all_columns = list(df.columns)
     if train_columns is None:  # if we want, we can specify which columns we want
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'windspeed']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
-    if 'count' in all_columns:  # if used for train set, we need to return the results too
-        y = df['count']
+    if pred_column in all_columns:  # if used for train set, we need to return the results too
+        y = df[pred_column]
     else:
         y = None
     return X, y
@@ -102,7 +104,7 @@ def sequential_nn_model(X_train, y_train):
 
         Dense(1, activation='relu')
     ])
-    model.compile(optimizer='nadam',
+    model.compile(optimizer='adam',
                   loss=rmsle,
                   metrics=['mean_squared_logarithmic_error'])
 
