@@ -17,12 +17,12 @@ df_test = Reader.read_data('test.csv', one_hot=False)
 
 X,y = Reader.select_train_columns(df_train)
 df_test = Reader.select_train_columns(df_test)[0]
-print(X.columns)
+print(X.dtypes)
 print(X.head())
 print(X.isnull().sum())
 print(y.isnull().sum())
 # train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
 print(X_train.shape)
 print(y_train.shape)
 # Random Forest
@@ -48,7 +48,7 @@ merged_pred.append(pd.Series(y_pred, name='pred_rf' + str(1)))
 df_test = Reader.read_data('test.csv')
 df_train = Reader.read_data('train.csv')
 X,y = Reader.select_train_columns(df_train)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
 
 df_test = Reader.select_train_columns(df_test)[0]
 df_test['weather_4']=0
@@ -69,6 +69,6 @@ print_scores("mean predictions", y_test, mean_pred['avg'].tolist())
 mean=np.mean(y_test-mean_pred['avg'].tolist())
 print(mean)
 mean_list=mean_pred['avg'].tolist()
-mean_list=[x+mean for x in  mean_list]
+mean_list=[x+(mean/2) for x in  mean_list]
 print_scores('adjusted predictions', y_test, mean_list)
 print(np.mean(y_test-mean_list))
