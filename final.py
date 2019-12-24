@@ -2,8 +2,6 @@ from sklearn.model_selection import train_test_split
 
 from Reader import *
 
-
-
 df = read_data('train.csv')
 df_test = read_data('test.csv')
 
@@ -18,4 +16,4 @@ nn = sequential_nn_model(X_train,y_train)  # fitting neural network model on X a
 nn_pred = nn.predict(X_test)  # making prediction
 nn_pred = [transform_list_item(x) for x in nn_pred]
 
-print_scores("Neural Network", y_test, nn_pred)
+get_scores("Neural Network", y_test, nn_pred)

@@ -48,7 +48,7 @@ ElNet_model.fit(X_train, y_train)
 ElNet_pred = ElNet_model.predict(X_test)
 bring_to_zero(ElNet_pred)
 
-print_scores('ElasticNet', y_test, ElNet_pred)
+get_scores('ElasticNet', y_test, ElNet_pred)
 
 Lasso_model = Lasso(alpha=150,max_iter=3000)
 Lasso_model.fit(X_train,y_train)
@@ -56,7 +56,7 @@ Lasso_pred = Lasso_model.fit(X_test,y_test)
 Lasso_pred = Lasso_model.predict(X_test)
 bring_to_zero(Lasso_pred)
 
-print_scores('Lasso', y_test, Lasso_pred)
+get_scores('Lasso', y_test, Lasso_pred)
 
 #Tensorflow Neural Network
 Seq_NN = sequential_nn_model(X_train,y_train)
@@ -64,7 +64,7 @@ NN_pred = Seq_NN.predict(X_test)
 individual_NN_pred = [transform_list_item(x) for x in NN_pred]
 bring_to_zero(individual_NN_pred)
 
-print_scores('Sequential Neural Network', y_test, individual_NN_pred)
+get_scores('Sequential Neural Network', y_test, individual_NN_pred)
 
 #--Outlier Detection------------------------------------------------------
 # clf = IsolationForest(contamination=0.05)

@@ -1,8 +1,13 @@
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
 
+
+
 from Reader import *
+
+pd.set_option('display.max_columns', 100)
+pd.set_option('display.max_rows', 13000)
 
 # reading data without one-hot encoding, since that's optimal for RF
 df = read_data('train.csv', one_hot=False)
@@ -18,10 +23,11 @@ merged_pred = []
 
 # ----- using Random Forest -----
 for i in range(10):
-    rf = RandomForestRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
+    rf = ExtraTreesRegressor(n_jobs=-1, max_depth=100, n_estimators=500, random_state=0)
     rf.fit(X,y)
     rf_pred = rf.predict(df_test)
     merged_pred.append(pd.Series(rf_pred, name='pred_rf' + str(i)))
+    print(i)
 
 # print_scores("Random Forest", y_test, rf_pred)
 
@@ -45,14 +51,14 @@ for i in range(15):
     merged_pred.append(pd.Series(nn_pred, name='pred_nn' + str(i)))
 # print_scores("Neural Network", y_test, nn_pred)
 
-# ------- using mlp -------
-for i in range(5):
-    mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
-                       verbose=False,
-                       max_iter=400)
-    mlp.fit(X,y)
-    mlp_pred = mlp.predict(df_test)
-    merged_pred.append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
+# # ------- using mlp -------
+# for i in range(5):
+#     mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
+#                        verbose=False,
+#                        max_iter=400)
+#     mlp.fit(X,y)
+#     mlp_pred = mlp.predict(df_test)
+#     merged_pred.append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
 
 # merging the results from each method in a single dataframe
 merged_pred_df = pd.concat(merged_pred, axis=1)
