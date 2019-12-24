@@ -13,7 +13,7 @@ if os.path.exists('log.txt'):
 else:
     append_write = 'w'  # make a new file if not
 
-predict_columns = ['casual', 'registered', 'count']
+predict_columns = ['casual', 'registered']
 
 merged_pred = {}  # dictionary with predictions for each column
 merged_pred_df = {}  # dictionary with dataframes
@@ -38,14 +38,14 @@ for column in predict_columns:
     # ----- using Random Forest -----
     for i in range(20):
         rf = RandomForestRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
-        rf.fit(X_train, y_train)
-        rf_pred = rf.predict(X_test)
+        rf.fit(X, y)
+        rf_pred = rf.predict(df_test)
         rf_pred = Reader.bring_to_zero(rf_pred)
         merged_pred[column].append(pd.Series(rf_pred, name='pred_rf' + str(i)))
-    scores = Reader.get_scores(column + " RF", merged_pred[column][0], y_test)
-    with open('log.txt', append_write) as file:
-        file.write(scores)
-    print(scores)
+    # scores = Reader.get_scores(column + " RF", merged_pred[column][0], y_test)
+    # with open('log.txt', append_write) as file:
+    #     file.write(scores)
+    # print(scores)
     # reading data again to apply one-hot encoding
 
     df = Reader.read_data('train.csv', extra_csv=column+'.csv')
@@ -60,21 +60,21 @@ for column in predict_columns:
 
     # ------- using neural network -----
     for i in range(30):
-        nn = Reader.sequential_nn_model(X_train, y_train)  # fitting neural network model on X and y
-        nn_pred = nn.predict(X_test)  # making prediction
+        nn = Reader.sequential_nn_model(X, y)  # fitting neural network model on X and y
+        nn_pred = nn.predict(df_test)  # making prediction
         nn_pred = [Reader.transform_list_item(x) for x in nn_pred]
         merged_pred[column].append(pd.Series(nn_pred, name='pred_nn' + str(i)))
-    scores = Reader.get_scores(column + " Neural Network", y_test, nn_pred)
-    with open('log.txt', append_write) as file:
-        file.write(scores)
-    print(scores)
+    # scores = Reader.get_scores(column + " Neural Network", y_test, nn_pred)
+    # with open('log.txt', append_write) as file:
+    #     file.write(scores)
+    # print(scores)
     # ------- using mlp -------
     for i in range(10):
         mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
                            verbose=False,
                            max_iter=400)
-        mlp.fit(X_train, y_train)
-        mlp_pred = mlp.predict(X_test)
+        mlp.fit(X, y)
+        mlp_pred = mlp.predict(df_test)
         mlp_pred = Reader.bring_to_zero(mlp_pred)
         merged_pred[column].append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
 
@@ -84,14 +84,14 @@ for column in predict_columns:
     # getting the mean
     mean_pred[column] = pd.DataFrame()
     mean_pred[column]['avg'] = merged_pred_df[column].mean(axis=1)  # getting the mean average of the columns
-    scores = Reader.get_scores(column + " AVG prediction", y_test, mean_pred[column]['avg'].tolist())
-    with open('log.txt', append_write) as file:
-        file.write(scores)
-    print(scores)
+    # scores = Reader.get_scores(column + " AVG prediction", y_test, mean_pred[column]['avg'].tolist())
+    # with open('log.txt', append_write) as file:
+    #     file.write(scores)
+    # print(scores)
 # now we are going to merge casual and registered predictions
-summed_pred = mean_pred['casual'] + mean_pred['registered']
-scores = Reader.get_scores("Summed prediction", y_test, summed_pred)
-with open('log.txt', append_write) as file:
-    file.write(scores)
-print(scores)
-# create_submission(summed_pred, filename='summed_submission.csv')
+summed_pred = (mean_pred['casual']*0.7) + (mean_pred['registered']*0.3)
+# scores = Reader.get_scores("Summed prediction", y_test, summed_pred)
+# with open('log.txt', append_write) as file:
+#     file.write(scores)
+# print(scores)
+Reader.create_submission(summed_pred, filename='summed_submission.csv')
