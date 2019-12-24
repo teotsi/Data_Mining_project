@@ -64,10 +64,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_
 # #->Prediction
 # clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
 # clf.fit(X_train, y_train)
-# parameters = {'kernel': ('linear', 'poly', 'rbf'), 'C': [1, 2, 5, 100], 'gamma': [1e-3, 1e-4]}
-# svc = svm.SVC(gamma="scale")
-# clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1, verbose=3)
-clf = RandomForestRegressor(n_estimators=200)
+parameters = {'kernel': ('linear', 'poly', 'rbf'), 'C': [1, 2, 5], 'gamma': [1e-3, 1e-4]}
+svc = svm.SVC(gamma="scale")
+clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1, verbose=3)
+# clf = RandomForestRegressor(n_estimators=200)
 clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 # print(y_pred)
@@ -77,7 +77,7 @@ for i, y in enumerate(y_pred):
 
 print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
 print('R2:', r2_score(y_test, y_pred))
-
+print(clf._best_params_)
 # print (df_test.head(5))
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
@@ -85,8 +85,3 @@ y_pred = clf.predict(df_test)
 for i, y in enumerate(y_pred):
     if y_pred[i] < 0:
         y_pred[i] = 0
-
-submission = pd.DataFrame()
-submission['Id'] = range(y_pred.shape[0])
-submission['Predicted'] = y_pred
-submission.to_csv("submission.csv", index=False)
