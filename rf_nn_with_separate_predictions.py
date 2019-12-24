@@ -20,10 +20,10 @@ merged_pred_df = {}  # dictionary with dataframes
 mean_pred = {}  # dictionary with mean results
 for column in predict_columns:
     print("Training for " + column + '\n')
-    with open('log.txt', append_write) as file:
-        if append_write == 'w':
-            append_write = 'a'
-        file.write('Training for ' + column)
+    # with open('log.txt', append_write) as file:
+    #     if append_write == 'w':
+    #         append_write = 'a'
+    #     file.write('Training for ' + column)
     df = Reader.read_data('train.csv', one_hot=False, extra_csv=column+'.csv')
     df_test = Reader.read_data('test.csv', one_hot=False, extra_csv=column+'.csv')  # random forest is used without one-hot encoding
 

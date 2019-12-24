@@ -158,4 +158,3 @@ R2 for count AVG prediction: 0.8701731124445796
 
 RMSLE for Summed prediction: 0.37789693000211
 R2 for Summed prediction: 0.8710132768255251
-Training for casualTraining for registeredTraining for countTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for registered
