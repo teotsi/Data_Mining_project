@@ -3,7 +3,9 @@ import pandas as pd
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 import Reader
-from sklearn.ensemble import IsolationForest
+from sklearn.ensemble import AdaBoostRegressor, BaggingRegressor, ExtraTreesRegressor, IsolationForest, RandomForestRegressor
+from sklearn.feature_selection import SelectKBest, f_classif
+
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)
@@ -47,11 +49,11 @@ df[['hum']] = train_humidity_scaled
 df_test[['windspeed']] = test_wind_scaled
 df_test[['hum']] = test_humidity_scaled
 
-df = Reader.read_data(df)
-df_test = Reader.read_data(df_test)
+df = Reader.read_data(df, is_dataframe=True, one_hot=False)
+df_test = Reader.read_data(df_test, is_dataframe=True, one_hot=False)
 
 #Training
-df = df.drop(columns=['weather_4'])
+#df = df.drop(columns=['weather_4'])
 all_columns = list(df.columns)
 # Training and test data is created by splitting the main data. 30% of test data is considered
 train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather', 'temp', 'humidity', 'windspeed']
@@ -73,12 +75,23 @@ for i in range(X.shape[0]):
         y=y.drop([i])
 
 
-NNmodel = Reader.sequential_nn_model(X, y)
+NNmodel = Reader.sequential_nn_model(X_train, y_train)
+# rF = RandomForestRegressor(n_estimators=25, max_depth=100)
+# rF.fit(X_train, y_train)
+
+# extreme=ExtraTreesRegressor(n_estimators=100, max_depth=100)
+# extreme.fit(X_train, y_train)
+
+# ada = AdaBoostRegressor(base_estimator=extreme, n_estimators=25, learning_rate=1, loss='linear')
+# ada.fit(X_train, y_train)
+
+# bag = BaggingRegressor(base_estimator=extreme, n_estimators=25)
+# bag.fit(X_train,y_train)
 
 df_test['weather_4'] = 0
 df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]
 test_array = df_test.to_numpy()
-predictions = NNmodel.predict(test_array)
+predictions = NNmodel.predict(X_test)
 
 
 individual_predictions = [Reader.transform_list_item(x) for x in predictions]
@@ -86,7 +99,10 @@ for i, y in enumerate(individual_predictions):
     if individual_predictions[i] < 0:
         individual_predictions[i] = 0
 
+
+Reader.print_scores('Extreme', y_test, individual_predictions)
+
 submission = pd.DataFrame()
-submission['Id'] = range(len(individual_predictions))
-submission['Predicted'] = individual_predictions
+submission['Id'] = range(len(predictions))
+submission['Predicted'] = predictions
 submission.to_csv("submission.csv", index=False)
