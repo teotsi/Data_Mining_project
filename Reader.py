@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest
+from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, StackingRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
+from sklearn.model_selection import GridSearchCV
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
@@ -130,6 +131,16 @@ def isolation_forest(X, y, drop_outliers=True):
                 X = X.drop([i])
                 y = y.drop([i])
     return X, y
+
+
+def gradient_boost_with_random_forest(X, y):
+    gb = GradientBoostingRegressor(random_state=0, max_depth=25, n_estimators=800)
+
+    rf = RandomForestRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
+
+    stacking = StackingRegressor(estimators=[('gradientBoost', gb),('RandomForest',rf)],n_jobs=-1, verbose=3)
+    stacking.fit(X,y)
+    return stacking
 
 
 def avg_cnt_per_day_of_month(df, extra_csv=None):
