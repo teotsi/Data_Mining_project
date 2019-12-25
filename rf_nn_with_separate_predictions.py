@@ -56,6 +56,18 @@ for column in predict_columns:
     with open('log.txt', append_write) as file:
         file.write(scores)
     print(scores)
+
+    # Using gradient boost with random forest
+    for i in range(1):
+        gbrf = gradient_boost_with_random_forest(X_train, y_train)
+        pred_gbrf = gbrf.predict(X_test)
+        pred_gbrf = bring_to_zero(pred_gbrf)
+        merged_pred[column].append(pd.Series(pred_gbrf, name='pred_gbrf' + str(i)))
+    scores = get_scores(column + " gbrf prediction", y_test, pred_gbrf)
+    with open('log.txt', append_write) as file:
+        file.write(scores)
+    print(scores)
+
     # reading data again to apply one-hot encoding
 
     df = read_data('train.csv', extra_csv=column + '.csv')

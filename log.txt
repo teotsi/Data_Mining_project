@@ -378,3 +378,54 @@ R2 for Floor summed predictions: 0.868749012840085
 Training for casual
 RMSLE for casual RF: 0.5677950080308802
 R2 for casual RF: 0.8723138192692856
+Training for casualTraining for casual
+RMSLE for casual RF: 0.5677950080308802
+R2 for casual RF: 0.8723138192692856
+
+RMSLE for casual gbrf prediction: 0.5529315905565201
+R2 for casual gbrf prediction: 0.8850993273920387
+
+RMSLE for casual Neural Network: 0.5802390036901175
+R2 for casual Neural Network: 0.8369207405537851
+
+RMSLE for casual AVG prediction: 0.5368086746051893
+R2 for casual AVG prediction: 0.8861240412386281
+
+RMSLE for adjusted predictions for casual: 0.5428565375690757
+R2 for adjusted predictions for casual: 0.8861639367527119
+Training for registered
+RMSLE for registered RF: 0.4140080773790277
+R2 for registered RF: 0.8315182711658053
+
+RMSLE for registered gbrf prediction: 0.40789676856674884
+R2 for registered gbrf prediction: 0.8518862992823718
+
+RMSLE for registered Neural Network: 0.4264217950774737
+R2 for registered Neural Network: 0.8287728044391549
+
+RMSLE for registered AVG prediction: 0.3930071019548632
+R2 for registered AVG prediction: 0.8585401728437129
+
+RMSLE for adjusted predictions for registered: 0.40822467737373774
+R2 for adjusted predictions for registered: 0.858777374402997
+Training for count
+RMSLE for count RF: 0.4056403705441711
+R2 for count RF: 0.8459179852327924
+
+RMSLE for count gbrf prediction: 0.43703737594340286
+R2 for count gbrf prediction: 0.8657679087364402
+
+RMSLE for count Neural Network: 0.41407082757814195
+R2 for count Neural Network: 0.8353098986859369
+
+RMSLE for count AVG prediction: 0.38164276241145073
+R2 for count AVG prediction: 0.8694060223789827
+
+RMSLE for adjusted predictions for count: 0.3875329075190537
+R2 for adjusted predictions for count: 0.8695372907775664
+
+RMSLE for Summed prediction: 0.38009303861039784
+R2 for Summed prediction: 0.871872938782282
+
+RMSLE for Floor summed predictions: 0.3801119143430785
+R2 for Floor summed predictions: 0.8717937516010115
