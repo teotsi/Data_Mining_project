@@ -156,6 +156,7 @@ def avg_cnt_per_day_of_month(df, extra_csv=None):
     return df
 
 
+
 def create_submission(predictions, filename=None):
     if filename is None:
         filename = 'submission.csv'
