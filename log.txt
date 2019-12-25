@@ -429,3 +429,94 @@ R2 for Summed prediction: 0.871872938782282
 
 RMSLE for Floor summed predictions: 0.3801119143430785
 R2 for Floor summed predictions: 0.8717937516010115
+Training for casual
+RMSLE for casual RF: 0.5677950080308802
+R2 for casual RF: 0.8723138192692856
+
+RMSLE for casual Neural Network: 0.5867326043862444
+R2 for casual Neural Network: 0.8358355966424056
+
+RMSLE for casual AVG prediction: 0.5447131529280006
+R2 for casual AVG prediction: 0.878100093395017
+
+RMSLE for adjusted predictions for casual: 0.5422782264174082
+R2 for adjusted predictions for casual: 0.8781123165476483
+Training for registered
+RMSLE for registered RF: 0.4140080773790277
+R2 for registered RF: 0.8315182711658053
+
+RMSLE for registered Neural Network: 0.43484616859173536
+R2 for registered Neural Network: 0.8341450493613367
+
+RMSLE for registered AVG prediction: 0.39418971462346053
+R2 for registered AVG prediction: 0.857668230393977
+
+RMSLE for adjusted predictions for registered: 0.4080120693358459
+R2 for adjusted predictions for registered: 0.8578863665841299
+
+RMSLE for Summed prediction: 0.47516648483859125
+R2 for Summed prediction: 0.7230837288735803
+
+RMSLE for Floor summed predictions: 0.4696452391475024
+R2 for Floor summed predictions: 0.7246540310678612
+
+RMSLE for Floor summed gradient casual predictions: 0.469582858929614
+R2 for Floor summed gradient casual predictions: 0.7230827074543758
+Training for casualTraining for casualTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for casual
+RMSLE for casual RF: 0.5484152434339119
+R2 for casual RF: 0.9123146912381718
+
+RMSLE for casual Neural Network: 0.5875756712814232
+R2 for casual Neural Network: 0.7126060739852957
+
+RMSLE for casual AVG prediction: 0.5063925620143489
+R2 for casual AVG prediction: 0.8750544359824699
+Training for registered
+RMSLE for registered RF: 0.3441493143627432
+R2 for registered RF: 0.934996161416689
+
+RMSLE for registered Neural Network: 4.577178599101544
+R2 for registered Neural Network: -1.0531722125576768
+
+RMSLE for registered AVG prediction: 0.6837932669227315
+R2 for registered AVG prediction: 0.44496889370253256
+Training for countTraining for casual
+RMSLE for casual RF: 0.5484152434339119
+R2 for casual RF: 0.9123146912381718
+
+RMSLE for casual Neural Network: 0.5918633667341159
+R2 for casual Neural Network: 0.8199752076882694
+
+RMSLE for casual AVG prediction: 0.5498891871976035
+R2 for casual AVG prediction: 0.8987223019472562
+Training for registered
+RMSLE for registered RF: 0.3441493143627432
+R2 for registered RF: 0.934996161416689
+
+RMSLE for registered Neural Network: 0.35936525623751814
+R2 for registered Neural Network: 0.8931208442927032
+
+RMSLE for registered AVG prediction: 0.32920338164627294
+R2 for registered AVG prediction: 0.9335640137893585
+Training for count
+RMSLE for count RF: 0.3439486835355299
+R2 for count RF: 0.938221709302705
+
+RMSLE for count Neural Network: 0.4537044676173368
+R2 for count Neural Network: 0.7786208825655047
+
+RMSLE for count AVG prediction: 0.3741118871659564
+R2 for count AVG prediction: 0.9041517685167022
+
+RMSLE for Summed prediction: 0.32814377197687566
+R2 for Summed prediction: 0.9339627671017722
+
+RMSLE for Floor summed predictions: 0.32401158899354116
+R2 for Floor summed predictions: 0.9342192482297864
+
+RMSLE for summed predictions with descent: 0.3209195250032608
+R2 for summed predictions with descent: 0.9396496332175108
+
+RMSLE for Floor summed predictions with descent: 0.3215859762673995
+R2 for Floor summed predictions with descent: 0.9397876303964183
+Training for casualTraining for casualTraining for registeredTraining for countTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for casual

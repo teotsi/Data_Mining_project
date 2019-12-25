@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, StackingRegressor
+from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, StackingRegressor, \
+    ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
-from sklearn.model_selection import GridSearchCV
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
@@ -36,6 +36,8 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
     # df['humidity'] = df.humidity.astype('category')
 
     df = avg_cnt_per_day_of_month(df, extra_csv)
+    df = avg_cnt_By_Year_by_mnth(df)
+    df = avg_cnt_per_weekday_of_year(df)
 
     columns_to_remove = ['atemp']
     # #------------------- try to calculate casual and registered and predict their sum -------------------------
@@ -47,7 +49,8 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
     if one_hot:
         one_hot_columns = list(df.columns)  # getting all columns
         non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity', 'casual',
-                                   'registered']  # these are not categorical columns
+                                   'registered', 'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
+                                   'Month_day_cnt_avg']  # these are not categorical columns
         one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
         for column in one_hot_columns:
             df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
@@ -64,7 +67,8 @@ def select_train_columns(df, train_columns=None, pred_column=None):
     if train_columns is None:  # if we want, we can specify which columns we want
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
-                         'windspeed']
+                         'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
+                                   'Month_day_cnt_avg']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -136,11 +140,22 @@ def isolation_forest(X, y, drop_outliers=True):
 def gradient_boost_with_random_forest(X, y):
     gb = GradientBoostingRegressor(random_state=0, max_depth=25, n_estimators=800)
 
-    rf = RandomForestRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
+    rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
 
-    stacking = StackingRegressor(estimators=[('gradientBoost', gb),('RandomForest',rf)],n_jobs=-1, verbose=3)
-    stacking.fit(X,y)
+    stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf)], n_jobs=-1, verbose=3)
+    stacking.fit(X, y)
     return stacking
+
+
+def avg_cnt_per_weekday_of_year(df):
+    extra = pd.read_csv('cntByYrByWd.csv')
+    cnt_avg_peryr_per_weekday = []
+    for i in range(df.shape[0]):
+        weekday = df.weekday[i]
+        year = df.year[i]
+        cnt_avg_peryr_per_weekday.append(extra.iloc[weekday][year])
+    df['year_day_cnt_avg'] = cnt_avg_peryr_per_weekday
+    return df
 
 
 def avg_cnt_per_day_of_month(df, extra_csv=None):
@@ -155,6 +170,7 @@ def avg_cnt_per_day_of_month(df, extra_csv=None):
     df['Month_day_cnt_avg'] = cnt_avg_perMnth_perDay
     return df
 
+
 def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
     if extra_csv is None:
         extra_csv = 'cntByYrByMnth.csv'
@@ -163,12 +179,13 @@ def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
     for i in range(df.shape[0]):
         year = df.year[i]
         month = df.month[i]
-        if year==0:
-            avg_cnt_By_Year_by_Month.append(extra.iloc[month][2])
+        if year == 0:
+            avg_cnt_By_Year_by_Month.append(extra.iloc[month - 1][2])
         else:
-            avg_cnt_By_Year_by_Month.append(extra.iloc[month+12][2])
+            avg_cnt_By_Year_by_Month.append(extra.iloc[month + 10][2])
     df['Count_By_Month_of_Year_avg'] = avg_cnt_By_Year_by_Month
     return df
+
 
 def create_submission(predictions, filename=None):
     if filename is None:
