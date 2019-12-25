@@ -155,7 +155,20 @@ def avg_cnt_per_day_of_month(df, extra_csv=None):
     df['Month_day_cnt_avg'] = cnt_avg_perMnth_perDay
     return df
 
-
+def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
+    if extra_csv is None:
+        extra_csv = 'cntByYrByMnth.csv'
+    extra = pd.read_csv(extra_csv)
+    avg_cnt_By_Year_by_Month = []
+    for i in range(df.shape[0]):
+        year = df.year[i]
+        month = df.month[i]
+        if year==0:
+            avg_cnt_By_Year_by_Month.append(extra.iloc[month][2])
+        else:
+            avg_cnt_By_Year_by_Month.append(extra.iloc[month+12][2])
+    df['Count_By_Month_of_Year_avg'] = avg_cnt_By_Year_by_Month
+    return df
 
 def create_submission(predictions, filename=None):
     if filename is None:
