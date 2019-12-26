@@ -2,11 +2,12 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import IsolationForest, HistGradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
+from sklearn.experimental import enable_hist_gradient_boosting
 import sklearn
 
 
@@ -15,6 +16,8 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
         df = pd.read_csv(input)
     else:
         df = input
+
+    df['windspeed'] = normalizer('windspeed', df, for_one_hot=False)
 
     if extra_csv is None:
         extra_csv = 'count.csv'
@@ -38,6 +41,8 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
     df = avg_cnt_per_day_of_month(df, extra_csv)
     df = avg_cnt_By_Year_by_mnth(df)
     df = avg_cnt_per_weekday_of_year(df)
+    df = avg_casual_by_weekDay_by_Weather(df)
+    df = avg_casual_perWorkingDay(df)
 
     columns_to_remove = ['atemp']
     # #------------------- try to calculate casual and registered and predict their sum -------------------------
@@ -68,7 +73,7 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather']
+                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather', 'windspeed', 'Avg_casual_on_Workday']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -78,20 +83,22 @@ def select_train_columns(df, train_columns=None, pred_column=None):
 
 
 # Normalizes the given column
-def normalizer(column, df):
+def normalizer(column, df, for_one_hot=False):
     x = df[[column]].values.astype(float)
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
+    
+    if for_one_hot:
+        for i in range(len(x_scaled)):
+            if x_scaled[i] <= 0.25:
+                x_scaled[i] = int(0)
+            elif x_scaled[i] <= 0.5:
+                x_scaled[i] = int(1)
+            elif x_scaled[i] <= 0.75:
+                x_scaled[i] = int(2)
+            else:
+                x_scaled[i] = int(3)
 
-    for i in range(len(x_scaled)):
-        if x_scaled[i] <= 0.25:
-            x_scaled[i] = int(0)
-        elif x_scaled[i] <= 0.5:
-            x_scaled[i] = int(1)
-        elif x_scaled[i] <= 0.75:
-            x_scaled[i] = int(2)
-        else:
-            x_scaled[i] = int(3)
     return x_scaled
 
 
@@ -138,9 +145,9 @@ def isolation_forest(X, y, drop_outliers=True):
 
 
 def gradient_boost_with_extra_trees(X, y):
-    gb = GradientBoostingRegressor(loss='huber', alpha=0.01, random_state=0, max_depth=25, n_estimators=800, warm_start=True)
+    gb = HistGradientBoostingRegressor(loss='least_squares', max_depth=150)
 
-    ex = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
+    ex = ExtraTreesRegressor(n_jobs=-1, max_depth=100, n_estimators=1000, random_state=0)
 
     rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
     done = False
@@ -201,10 +208,22 @@ def avg_casual_by_weekDay_by_Weather(df, extra_csv=None):
     avg_casual_by_weekday_by_weather = []
     for i in range(df.shape[0]):
         weekday = df.weekday[i]
-        weather = df.weathersit[i]
+        weather = df.weather[i]
         avg_casual_by_weekday_by_weather.append(extra.iloc[weekday][weather-1])
     df['Avg_casual_by_Weekday_by_Weather'] = avg_casual_by_weekday_by_weather
     return df
+
+def avg_casual_perWorkingDay(df, extra_csv=None):
+    if extra_csv is None:
+        extra_csv = 'Avg_casual_perWorkingDay.csv'
+    extra = pd.read_csv(extra_csv)
+    avg_casual_perWorkDay = []
+    for i in range(df.shape[0]):
+        workingDay = df.workingday[i]
+        avg_casual_perWorkDay.append(extra.iloc[workingDay][1])
+    df['Avg_casual_on_Workday'] = avg_casual_perWorkDay
+    return df
+
 
 def create_submission(predictions, filename=None):
     if filename is None:
