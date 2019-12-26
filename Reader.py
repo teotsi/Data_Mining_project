@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, HistGradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import IsolationForest, RandomForestRegressor, ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
