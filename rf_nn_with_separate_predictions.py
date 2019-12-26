@@ -1,10 +1,9 @@
 import os
 from copy import deepcopy
 
-from numpy import mean
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
+
 from Reader import *
 
 pd.set_option('display.max_columns', 100)
@@ -32,7 +31,6 @@ for column in predict_columns:
 
     X, y = select_train_columns(df, pred_column=column)
 
-
     # Training and test data is created by splitting the main data. 30% of test data is considered
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     y_tests[column] = deepcopy(y_test)
@@ -48,7 +46,7 @@ for column in predict_columns:
     # ----- using Random Forest -----
     REPETITIONS = 10
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
-    rf.fit(X,y)
+    rf.fit(X, y)
     rf_pred = rf.predict(df_test)
     rf_pred = bring_to_zero(rf_pred)
     for i in range(REPETITIONS):
@@ -71,11 +69,17 @@ for column in predict_columns:
     df_test = select_train_columns(df_test, pred_column=column)[0]
 
     # ------- using neural network -----
-    for i in range(15):
-        nn = sequential_nn_model(X,y)  # fitting neural network model on X and y
+    i = 0
+    while i < 15:
+        nn = sequential_nn_model(X, y)  # fitting neural network model on X and y
         nn_pred = nn.predict(df_test.to_numpy())  # making prediction
         nn_pred = [transform_list_item(x) for x in nn_pred]
+        print(nn_pred[0:5])
+        if all(pred == 0.0 for pred in nn_pred):
+            print("fixing nn")
+            continue
         merged_pred[column].append(pd.Series(nn_pred, name='pred_nn' + str(i)))
+        i += 1
     # scores = get_scores(column + " Neural Network", y_test, nn_pred)
     # with open('log.txt', append_write) as file:
     #     file.write(scores)
@@ -85,7 +89,7 @@ for column in predict_columns:
         mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
                            verbose=False,
                            max_iter=400)
-        mlp.fit(X,y)
+        mlp.fit(X, y)
         mlp_pred = mlp.predict(df_test)
         mlp_pred = bring_to_zero(mlp_pred)
         merged_pred[column].append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
