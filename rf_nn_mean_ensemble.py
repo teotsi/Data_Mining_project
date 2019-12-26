@@ -1,10 +1,8 @@
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
-
-
-
 from Reader import *
+
 
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.max_rows', 13000)

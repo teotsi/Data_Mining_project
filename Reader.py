@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, StackingRegressor, \
-    ExtraTreesRegressor
+from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
+import sklearn
 
 
 def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
@@ -69,7 +69,8 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                         'Month_day_cnt_avg', 'cnt_per_holiday_by_mnth']
+                         'Month_day_cnt_avg', 'cnt_per_holiday_by_mnth',
+                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -139,7 +140,7 @@ def isolation_forest(X, y, drop_outliers=True):
 
 
 def gradient_boost_with_extra_trees(X, y):
-    gb = GradientBoostingRegressor(random_state=0, max_depth=25, n_estimators=800)
+    gb = GradientBoostingRegressor(loss='huber', alpha=0.01, random_state=0, max_depth=25, n_estimators=800, warm_start=True)
 
     ex = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
 
@@ -147,7 +148,7 @@ def gradient_boost_with_extra_trees(X, y):
     done = False
     while not done:
         try:
-            stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
+            stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
                                          n_jobs=-1, verbose=3)
             stacking.fit(X, y)
             done = True
@@ -204,6 +205,17 @@ def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
     df['Count_By_Month_of_Year_avg'] = avg_cnt_By_Year_by_Month
     return df
 
+def avg_casual_by_weekDay_by_Weather(df, extra_csv=None):
+    if extra_csv is None:
+        extra_csv = 'Avg_casual_perWeekday_basedOnWeather.csv'
+    extra = pd.read_csv(extra_csv)
+    avg_casual_by_weekday_by_weather = []
+    for i in range(df.shape[0]):
+        weekday = df.weekday[i]
+        weather = df.weathersit[i]
+        avg_casual_by_weekday_by_weather.append(extra.iloc[weekday][weather-1])
+    df['Avg_casual_by_Weekday_by_Weather'] = avg_casual_by_weekday_by_weather
+    return df
 
 def create_submission(predictions, filename=None):
     if filename is None:

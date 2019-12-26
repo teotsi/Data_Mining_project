@@ -519,4 +519,48 @@ R2 for summed predictions with descent: 0.9396496332175108
 
 RMSLE for Floor summed predictions with descent: 0.3215859762673995
 R2 for Floor summed predictions with descent: 0.9397876303964183
-Training for casualTraining for casualTraining for registeredTraining for countTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for casual
+Training for casualTraining for casualTraining for registeredTraining for countTraining for casualTraining for registeredTraining for countTraining for casualTraining for casualTraining for casualTraining for casual
+RMSLE for gradient rf boost for casual: 0.5447141883055396
+R2 for gradient rf boost for casual: 0.9198833499784417
+
+RMSLE for casual RF: 0.539027923382213
+R2 for casual RF: 0.9107175374678615
+
+RMSLE for casual Neural Network: 0.5762166548205272
+R2 for casual Neural Network: 0.7442182238133213
+Training for registered
+RMSLE for registered RF: 0.3199163218261393
+R2 for registered RF: 0.9416397520288735
+
+RMSLE for registered Neural Network: 0.3659275520540252
+R2 for registered Neural Network: 0.9005010006292299
+
+RMSLE for Summed prediction: 1.150597975116116
+R2 for Summed prediction: 0.5746775131698545
+
+RMSLE for Floor summed predictions: 1.1474178667405046
+R2 for Floor summed predictions: 0.5760692920831201
+Training for casual
+RMSLE for gradient rf boost for casual: 0.536138478432911
+R2 for gradient rf boost for casual: 0.9191455563554903
+
+RMSLE for casual RF: 0.5364115052416639
+R2 for casual RF: 0.9125376077369984
+
+RMSLE for casual Neural Network: 0.5813513890937316
+R2 for casual Neural Network: 0.7664378597132785
+Training for registered
+RMSLE for registered RF: 0.3362698910130695
+R2 for registered RF: 0.9412968632336017
+
+RMSLE for registered Neural Network: 0.3645787334539163
+R2 for registered Neural Network: 0.8443541190736988
+
+RMSLE for Summed prediction: 1.2243981820177166
+R2 for Summed prediction: 0.5255793577892227
+
+RMSLE for Floor summed predictions: 1.2216181578870557
+R2 for Floor summed predictions: 0.5268011953958909
+
+RMSLE for summed predictions with descent: 1.232335495466309
+R2 for summed predictions with descent: 0.452342888409648

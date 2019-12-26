@@ -30,7 +30,6 @@ for column in predict_columns:
                         extra_csv=column + '.csv')  # random forest is used without one-hot encoding
 
     X, y = select_train_columns(df, pred_column=column)
-
     # Training and test data is created by splitting the main data. 30% of test data is considered
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     y_tests[column] = deepcopy(y_test)
@@ -50,6 +49,7 @@ for column in predict_columns:
         casual_y_pred = casual_model.predict(X_test)
         log_scores(get_scores("gradient rf boost for casual", y_test, bring_to_zero(casual_y_pred)))
         merged_pred['test'] = casual_y_pred
+    
     # ----- using Random Forest -----
     REPETITIONS = 10
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
@@ -65,7 +65,6 @@ for column in predict_columns:
     df_test = read_data('test.csv', extra_csv=column + '.csv')
 
     X, y = select_train_columns(df, pred_column=column)
-
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)  # splitting
 
     df_test['weather_4'] = 0
