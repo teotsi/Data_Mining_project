@@ -39,9 +39,16 @@ for column in predict_columns:
 
     if column == 'casual':
         print('gbrf')
-        casual_model = gradient_boost_with_extra_trees(X_train, y_train)
+        done = False
+        while not done:
+            try:
+                casual_model = gradient_boost_with_extra_trees(X_train, y_train)
+                done = True
+            except ValueError:
+                print("Caught ValueError")
+
         casual_y_pred = casual_model.predict(X_test)
-        log_scores(get_scores("gradient rf boost for casual", y_test,bring_to_zero(casual_y_pred)))
+        log_scores(get_scores("gradient rf boost for casual", y_test, bring_to_zero(casual_y_pred)))
         merged_pred['test'] = casual_y_pred
     # ----- using Random Forest -----
     REPETITIONS = 10
@@ -53,7 +60,6 @@ for column in predict_columns:
         merged_pred[column].append(pd.Series(rf_pred, name='pred_rf' + str(i)))
     print(merged_pred[column])
     log_scores(get_scores(column + " RF", merged_pred[column][0], y_test))
-
 
     df = read_data('train.csv', extra_csv=column + '.csv')
     df_test = read_data('test.csv', extra_csv=column + '.csv')
