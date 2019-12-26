@@ -145,15 +145,15 @@ def isolation_forest(X, y, drop_outliers=True):
 
 
 def gradient_boost_with_extra_trees(X, y):
-    gb = HistGradientBoostingRegressor(loss='least_squares', max_depth=150)
+    gb = HistGradientBoostingRegressor(loss='least_absolute_deviation', max_depth=150)
 
     ex = ExtraTreesRegressor(n_jobs=-1, max_depth=100, n_estimators=1000, random_state=0)
 
-    rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
+    #rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
     done = False
     while not done:
         try:
-            stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
+            stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ("extraTrees", ex)],
                                          n_jobs=-1, verbose=3)
             stacking.fit(X, y)
             done = True
