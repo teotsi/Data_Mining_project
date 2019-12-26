@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, HistGradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import IsolationForest, RandomForestRegressor, ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
@@ -38,6 +38,7 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
     # df['windspeed'] = df.windspeed.astype('category')
     # df['humidity'] = df.humidity.astype('category')
 
+    df = avg_cnt_per_holiday_by_mnth(df)
     df = avg_cnt_per_day_of_month(df, extra_csv)
     df = avg_cnt_By_Year_by_mnth(df)
     df = avg_cnt_per_weekday_of_year(df)
@@ -73,6 +74,8 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
+                         'Month_day_cnt_avg', 'cnt_per_holiday_by_mnth',
+                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather',
                          'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather', 'windspeed', 'Avg_casual_on_Workday']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
@@ -87,7 +90,7 @@ def normalizer(column, df, for_one_hot=False):
     x = df[[column]].values.astype(float)
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
-    
+
     if for_one_hot:
         for i in range(len(x_scaled)):
             if x_scaled[i] <= 0.25:
@@ -162,6 +165,15 @@ def gradient_boost_with_extra_trees(X, y):
     return stacking
 
 
+def avg_cnt_per_holiday_by_mnth(df):
+    extra = pd.read_csv('cnt_per_holiday_by_mnth.csv')
+    cnt_per_holiday_by_mnth = []
+    for i in range(df.shape[0]):
+        holiday = df.holiday[i]
+        mnth = df.month[i]
+        cnt_per_holiday_by_mnth.append(extra.iloc[holiday][mnth - 1])
+    df['cnt_per_holiday_by_mnth'] = cnt_per_holiday_by_mnth
+    return df
 def avg_cnt_per_weekday_of_year(df):
     extra = pd.read_csv('cntByYrByWd.csv')
     cnt_avg_peryr_per_weekday = []
