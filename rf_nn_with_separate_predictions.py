@@ -39,24 +39,27 @@ for column in predict_columns:
 
     if column == 'casual':
         print('gbrf')
-        casual_model = gradient_boost_with_extra_trees(X, y)
-        casual_y_pred = casual_model.predict(df_test)
-        # print(get_scores("gradient rf boost for casual", y_test,bring_to_zero(casual_y_pred)))
+        done = False
+        while not done:
+            try:
+                casual_model = gradient_boost_with_extra_trees(X_train, y_train)
+                done = True
+            except ValueError:
+                print("Caught ValueError")
+
+        casual_y_pred = casual_model.predict(X_test)
+        log_scores(get_scores("gradient rf boost for casual", y_test, bring_to_zero(casual_y_pred)))
         merged_pred['test'] = casual_y_pred
     # ----- using Random Forest -----
     REPETITIONS = 10
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
-    rf.fit(X, y)
-    rf_pred = rf.predict(df_test)
+    rf.fit(X_train, y_train)
+    rf_pred = rf.predict(X_test)
     rf_pred = bring_to_zero(rf_pred)
     for i in range(REPETITIONS):
         merged_pred[column].append(pd.Series(rf_pred, name='pred_rf' + str(i)))
     print(merged_pred[column])
-    # scores = get_scores(column + " RF", merged_pred[column][0], y_test)
-    # with open('log.txt', append_write) as file:
-    #     file.write(scores)
-    # print(scores)
-    # reading data again to apply one-hot encoding
+    log_scores(get_scores(column + " RF", merged_pred[column][0], y_test))
 
     df = read_data('train.csv', extra_csv=column + '.csv')
     df_test = read_data('test.csv', extra_csv=column + '.csv')
@@ -71,8 +74,8 @@ for column in predict_columns:
     # ------- using neural network -----
     i = 0
     while i < 15:
-        nn = sequential_nn_model(X, y)  # fitting neural network model on X and y
-        nn_pred = nn.predict(df_test.to_numpy())  # making prediction
+        nn = sequential_nn_model(X_train, y_train)  # fitting neural network model on X and y
+        nn_pred = nn.predict(X_test)  # making prediction
         nn_pred = [transform_list_item(x) for x in nn_pred]
         print(nn_pred[0:5])
         if all(pred == 0.0 for pred in nn_pred):
@@ -80,17 +83,15 @@ for column in predict_columns:
             continue
         merged_pred[column].append(pd.Series(nn_pred, name='pred_nn' + str(i)))
         i += 1
-    # scores = get_scores(column + " Neural Network", y_test, nn_pred)
-    # with open('log.txt', append_write) as file:
-    #     file.write(scores)
-    # print(scores)
+    log_scores(get_scores(column + " Neural Network", y_test, nn_pred))
+
     # ------- using mlp -------
-    for i in range(5):
+    for i in range(0):
         mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
                            verbose=False,
                            max_iter=400)
-        mlp.fit(X, y)
-        mlp_pred = mlp.predict(df_test)
+        mlp.fit(X_train, y_train)
+        mlp_pred = mlp.predict(X_test)
         mlp_pred = bring_to_zero(mlp_pred)
         merged_pred[column].append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
 
@@ -117,25 +118,17 @@ for column in predict_columns:
 # now we are going to merge casual and registered predictions
 summed_pred = mean_pred['casual'] + mean_pred['registered']
 
-# scores = get_scores("Summed prediction", y_test, summed_pred)
-# with open('log.txt', append_write) as file:
-#     file.write(scores)
-# print(scores)
+log_scores(get_scores("Summed prediction", y_test, summed_pred))
 summed_pred_array = summed_pred.to_numpy()
 # create_submission(summed_pred_array, filename='sum.csv')
 summed_pred_array = np.floor(summed_pred_array)
 # create_submission(summed_pred_array, filename='sum_floor.csv')
 
-# scores = get_scores('Floor summed predictions', y_test, summed_pred_array)
-# with open('log.txt', append_write) as file:
-#     file.write(scores)
-# print(scores)
+log_scores(get_scores('Floor summed predictions', y_test, summed_pred_array))
 summed_pred = mean_pred['registered']['avg'] + merged_pred['test']
-# scores = get_scores('summed predictions with descent', y_test, summed_pred)
-# with open('log.txt', append_write) as file:
-#     file.write(scores)
-# print(scores)
-create_submission(summed_pred, filename='gradient_sum_full.csv')
+log_scores(get_scores('summed predictions with descent', y_test, summed_pred))
+
+# create_submission(summed_pred, filename='gradient_sum_full.csv')
 
 # summed_pred = np.floor(summed_pred)
 # scores = get_scores('Floor summed predictions with descent', y_test, summed_pred)

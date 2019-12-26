@@ -140,11 +140,13 @@ def isolation_forest(X, y, drop_outliers=True):
 def gradient_boost_with_extra_trees(X, y):
     gb = GradientBoostingRegressor(loss='huber', alpha=0.01, random_state=0, max_depth=25, n_estimators=800, warm_start=True)
 
-    rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
+    ex = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
 
-    stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf)], n_jobs=-1, verbose=3)
+    rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
+    stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)], n_jobs=-1, verbose=3)
     stacking.fit(X, y)
     return stacking
+
 
 
 def avg_cnt_per_weekday_of_year(df):
@@ -202,6 +204,10 @@ def get_scores(name, test_set, predictions):
     string += '\n' + 'R2 for ' + name + ': ' + str(r2_score(test_set, predictions)) + '\n'
     return string
 
+def log_scores(scores):
+    with open('log.txt', 'a') as file:
+        file.write(scores)
+    print(scores)
 
 def rmsle(y, y0):
     return K.sqrt(K.mean(K.square(log1p(y) - log1p(y0))))
