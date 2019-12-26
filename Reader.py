@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, StackingRegressor, \
-    ExtraTreesRegressor
+from sklearn.ensemble import IsolationForest, GradientBoostingRegressor, RandomForestRegressor, ExtraTreesRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
+import sklearn
 
 
 def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
@@ -138,11 +138,11 @@ def isolation_forest(X, y, drop_outliers=True):
 
 
 def gradient_boost_with_extra_trees(X, y):
-    gb = GradientBoostingRegressor(random_state=0, max_depth=25, n_estimators=800)
+    gb = GradientBoostingRegressor(loss='huber', alpha=0.01, random_state=0, max_depth=25, n_estimators=800, warm_start=True)
 
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
 
-    stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf)], n_jobs=-1, verbose=3)
+    stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf)], n_jobs=-1, verbose=3)
     stacking.fit(X, y)
     return stacking
 
