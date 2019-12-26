@@ -68,7 +68,7 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                                   'Month_day_cnt_avg']
+                         'Month_day_cnt_avg']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -143,10 +143,16 @@ def gradient_boost_with_extra_trees(X, y):
     ex = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
 
     rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
-    stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)], n_jobs=-1, verbose=3)
-    stacking.fit(X, y)
+    done = False
+    while not done:
+        try:
+            stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
+                                         n_jobs=-1, verbose=3)
+            stacking.fit(X, y)
+            done = True
+        except ValueError:
+            print("Caught ValueError")
     return stacking
-
 
 
 def avg_cnt_per_weekday_of_year(df):
@@ -204,10 +210,12 @@ def get_scores(name, test_set, predictions):
     string += '\n' + 'R2 for ' + name + ': ' + str(r2_score(test_set, predictions)) + '\n'
     return string
 
+
 def log_scores(scores):
     with open('log.txt', 'a') as file:
         file.write(scores)
     print(scores)
+
 
 def rmsle(y, y0):
     return K.sqrt(K.mean(K.square(log1p(y) - log1p(y0))))
