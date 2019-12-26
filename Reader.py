@@ -35,6 +35,7 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
     # df['windspeed'] = df.windspeed.astype('category')
     # df['humidity'] = df.humidity.astype('category')
 
+    df = avg_cnt_per_holiday_by_mnth(df)
     df = avg_cnt_per_day_of_month(df, extra_csv)
     df = avg_cnt_By_Year_by_mnth(df)
     df = avg_cnt_per_weekday_of_year(df)
@@ -68,7 +69,7 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                         'Month_day_cnt_avg']
+                         'Month_day_cnt_avg', 'cnt_per_holiday_by_mnth']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -155,6 +156,15 @@ def gradient_boost_with_extra_trees(X, y):
     return stacking
 
 
+def avg_cnt_per_holiday_by_mnth(df):
+    extra = pd.read_csv('cnt_per_holiday_by_mnth.csv')
+    cnt_per_holiday_by_mnth = []
+    for i in range(df.shape[0]):
+        holiday = df.holiday[i]
+        mnth = df.month[i]
+        cnt_per_holiday_by_mnth.append(extra.iloc[holiday][mnth - 1])
+    df['cnt_per_holiday_by_mnth'] = cnt_per_holiday_by_mnth
+    return df
 def avg_cnt_per_weekday_of_year(df):
     extra = pd.read_csv('cntByYrByWd.csv')
     cnt_avg_peryr_per_weekday = []
