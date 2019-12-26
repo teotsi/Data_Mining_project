@@ -2,13 +2,14 @@ import numpy as np
 import pandas as pd
 from keras import backend as K
 from sklearn import preprocessing
-from sklearn.ensemble import IsolationForest, RandomForestRegressor, ExtraTreesRegressor
+from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor, IsolationForest, RandomForestRegressor
 from sklearn.metrics import r2_score, mean_squared_log_error
 from tensorflow_core.python.keras.layers.core import Dense
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.ops.gen_math_ops import log1p
 from sklearn.experimental import enable_hist_gradient_boosting
 import sklearn
+from sklearn.ensemble._hist_gradient_boosting.gradient_boosting import HistGradientBoostingRegressor
 
 
 def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
@@ -148,20 +149,20 @@ def isolation_forest(X, y, drop_outliers=True):
 
 
 def gradient_boost_with_extra_trees(X, y):
-    gb = HistGradientBoostingRegressor(loss='least_absolute_deviation', max_depth=150)
+    gb = HistGradientBoostingRegressor(loss='least_absolute_deviation', learning_rate=0.12, max_depth=150)
 
-    ex = ExtraTreesRegressor(n_jobs=-1, max_depth=100, n_estimators=1000, random_state=0)
+    ex = ExtraTreesRegressor(n_jobs=-1, max_depth=100, n_estimators=100, random_state=0)
 
-    #rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
+    rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
     done = False
     while not done:
-        try:
-            stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ("extraTrees", ex)],
-                                         n_jobs=-1, verbose=3)
+        #try:
+            stacking = sklearn.ensemble.VotingRegressor(estimators=[('gradientBoost', gb), ('randomForest', rf),("extraTrees", ex)],
+                                         n_jobs=-1)
             stacking.fit(X, y)
             done = True
-        except ValueError:
-            print("Caught ValueError")
+        #except ValueError:
+            #print("Caught ValueError")
     return stacking
 
 
@@ -174,6 +175,7 @@ def avg_cnt_per_holiday_by_mnth(df):
         cnt_per_holiday_by_mnth.append(extra.iloc[holiday][mnth - 1])
     df['cnt_per_holiday_by_mnth'] = cnt_per_holiday_by_mnth
     return df
+
 def avg_cnt_per_weekday_of_year(df):
     extra = pd.read_csv('cntByYrByWd.csv')
     cnt_avg_peryr_per_weekday = []
