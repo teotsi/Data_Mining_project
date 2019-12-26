@@ -68,7 +68,7 @@ def select_train_columns(df, train_columns=None, pred_column=None):
         train_columns = ['season', 'month', 'hour', 'holiday', 'weekday', 'workingday', 'weather',
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                         'Month_day_cnt_avg']
+                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -146,7 +146,7 @@ def gradient_boost_with_extra_trees(X, y):
     done = False
     while not done:
         try:
-            stacking = StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
+            stacking = sklearn.ensemble.StackingRegressor(estimators=[('gradientBoost', gb), ('RandomForest', rf), ("extraTrees", ex)],
                                          n_jobs=-1, verbose=3)
             stacking.fit(X, y)
             done = True
@@ -194,6 +194,17 @@ def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
     df['Count_By_Month_of_Year_avg'] = avg_cnt_By_Year_by_Month
     return df
 
+def avg_casual_by_weekDay_by_Weather(df, extra_csv=None):
+    if extra_csv is None:
+        extra_csv = 'Avg_casual_perWeekday_basedOnWeather.csv'
+    extra = pd.read_csv(extra_csv)
+    avg_casual_by_weekday_by_weather = []
+    for i in range(df.shape[0]):
+        weekday = df.weekday[i]
+        weather = df.weathersit[i]
+        avg_casual_by_weekday_by_weather.append(extra.iloc[weekday][weather-1])
+    df['Avg_casual_by_Weekday_by_Weather'] = avg_casual_by_weekday_by_weather
+    return df
 
 def create_submission(predictions, filename=None):
     if filename is None:
