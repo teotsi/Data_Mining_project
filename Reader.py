@@ -137,7 +137,7 @@ def isolation_forest(X, y, drop_outliers=True):
     return X, y
 
 
-def gradient_boost_with_random_forest(X, y):
+def gradient_boost_with_extra_trees(X, y):
     gb = GradientBoostingRegressor(random_state=0, max_depth=25, n_estimators=800)
 
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
