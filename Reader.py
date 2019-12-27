@@ -57,7 +57,8 @@ def read_data(input, is_dataframe=False, one_hot=True, extra_csv=None):
         one_hot_columns = list(df.columns)  # getting all columns
         non_categorical_columns = ['temp', 'count', 'windspeed', 'humidity', 'casual',
                                    'registered', 'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
-                                   'Month_day_cnt_avg']  # these are not categorical columns
+                                   'Month_day_cnt_avg', 'Avg_casual_on_Workday', 'cnt_per_holiday_by_mnth',
+                                   'Avg_casual_by_Weekday_by_Weather']  # these are not categorical columns
         one_hot_columns = [x for x in one_hot_columns if x not in non_categorical_columns]  # excluding non-cat columns
         for column in one_hot_columns:
             df = pd.concat([df.drop(column, axis=1), pd.get_dummies(df[column], prefix=column)],
@@ -76,8 +77,7 @@ def select_train_columns(df, train_columns=None, pred_column=None):
                          'temp', 'humidity',
                          'Count_By_Month_of_Year_avg', 'year_day_cnt_avg',
                          'Month_day_cnt_avg', 'cnt_per_holiday_by_mnth',
-                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather',
-                         'Month_day_cnt_avg','Avg_casual_by_Weekday_by_Weather', 'windspeed', 'Avg_casual_on_Workday']
+                         'Avg_casual_by_Weekday_by_Weather', 'windspeed', 'Avg_casual_on_Workday']
     X = df[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
     if pred_column in all_columns:  # if used for train set, we need to return the results too
         y = df[pred_column]
@@ -156,13 +156,14 @@ def gradient_boost_with_extra_trees(X, y):
     rf = RandomForestRegressor(random_state=0, max_depth=25, n_estimators=900)
     done = False
     while not done:
-        #try:
-            stacking = sklearn.ensemble.VotingRegressor(estimators=[('gradientBoost', gb), ('randomForest', rf),("extraTrees", ex)],
-                                         n_jobs=-1)
-            stacking.fit(X, y)
-            done = True
-        #except ValueError:
-            #print("Caught ValueError")
+        # try:
+        stacking = sklearn.ensemble.VotingRegressor(
+            estimators=[('gradientBoost', gb), ('randomForest', rf), ("extraTrees", ex)],
+            n_jobs=-1)
+        stacking.fit(X, y)
+        done = True
+    # except ValueError:
+    # print("Caught ValueError")
     return stacking
 
 
@@ -175,6 +176,7 @@ def avg_cnt_per_holiday_by_mnth(df):
         cnt_per_holiday_by_mnth.append(extra.iloc[holiday][mnth - 1])
     df['cnt_per_holiday_by_mnth'] = cnt_per_holiday_by_mnth
     return df
+
 
 def avg_cnt_per_weekday_of_year(df):
     extra = pd.read_csv('cntByYrByWd.csv')
@@ -215,6 +217,7 @@ def avg_cnt_By_Year_by_mnth(df, extra_csv=None):
     df['Count_By_Month_of_Year_avg'] = avg_cnt_By_Year_by_Month
     return df
 
+
 def avg_casual_by_weekDay_by_Weather(df, extra_csv=None):
     if extra_csv is None:
         extra_csv = 'Avg_casual_perWeekday_basedOnWeather.csv'
@@ -223,9 +226,10 @@ def avg_casual_by_weekDay_by_Weather(df, extra_csv=None):
     for i in range(df.shape[0]):
         weekday = df.weekday[i]
         weather = df.weather[i]
-        avg_casual_by_weekday_by_weather.append(extra.iloc[weekday][weather-1])
+        avg_casual_by_weekday_by_weather.append(extra.iloc[weekday][weather - 1])
     df['Avg_casual_by_Weekday_by_Weather'] = avg_casual_by_weekday_by_weather
     return df
+
 
 def avg_casual_perWorkingDay(df, extra_csv=None):
     if extra_csv is None:

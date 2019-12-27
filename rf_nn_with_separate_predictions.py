@@ -13,7 +13,7 @@ if os.path.exists('log.txt'):
 else:
     append_write = 'w'  # make a new file if not
 
-predict_columns = ['casual', 'registered']
+predict_columns = ['casual', 'registered', 'count']
 
 merged_pred = {}  # dictionary with predictions for each column
 merged_pred_df = {}  # dictionary with dataframes
@@ -41,25 +41,29 @@ for column in predict_columns:
         done = False
         while not done:
             try:
-                casual_model = gradient_boost_with_extra_trees(X_train, y_train)
+                casual_model = gradient_boost_with_extra_trees(X, y)
                 done = True
             except ValueError:
                 print("Caught ValueError")
 
-        casual_y_pred = casual_model.predict(X_test)
-        log_scores(get_scores("gradient rf boost for casual", y_test, bring_to_zero(casual_y_pred)))
-        merged_pred['test'] = casual_y_pred
-    
+        casual_y_pred = casual_model.predict(df_test)
+        # log_scores(get_scores("gradient rf boost for casual", y_test, bring_to_zero(casual_y_pred)))
+        for i in range(6):
+            merged_pred[column].append(pd.Series(casual_y_pred, name='pred_gbrf' + str(i)))
+
     # ----- using Random Forest -----
-    REPETITIONS = 10
+    if column =='casual':
+        REPETITIONS = 15
+    else:
+        REPETITIONS = 10
     rf = ExtraTreesRegressor(n_jobs=-1, max_depth=75, n_estimators=900, random_state=0)
-    rf.fit(X_train, y_train)
-    rf_pred = rf.predict(X_test)
+    rf.fit(X, y)
+    rf_pred = rf.predict(df_test)
     rf_pred = bring_to_zero(rf_pred)
     for i in range(REPETITIONS):
         merged_pred[column].append(pd.Series(rf_pred, name='pred_rf' + str(i)))
     print(merged_pred[column])
-    log_scores(get_scores(column + " RF", merged_pred[column][0], y_test))
+    # log_scores(get_scores(column + " RF", merged_pred[column][0], y_test))
 
     df = read_data('train.csv', extra_csv=column + '.csv')
     df_test = read_data('test.csv', extra_csv=column + '.csv')
@@ -72,9 +76,15 @@ for column in predict_columns:
 
     # ------- using neural network -----
     i = 0
-    while i < 15:
-        nn = sequential_nn_model(X_train, y_train)  # fitting neural network model on X and y
-        nn_pred = nn.predict(X_test)  # making prediction
+    if column == 'casual':
+        reps = 13
+    elif column == 'registered':
+        reps = 20
+    else:
+        reps = 13
+    while i < reps:
+        nn = sequential_nn_model(X, y)  # fitting neural network model on X and y
+        nn_pred = nn.predict(df_test)  # making prediction
         nn_pred = [transform_list_item(x) for x in nn_pred]
         print(nn_pred[0:5])
         if all(pred == 0.0 for pred in nn_pred):
@@ -82,17 +92,17 @@ for column in predict_columns:
             continue
         merged_pred[column].append(pd.Series(nn_pred, name='pred_nn' + str(i)))
         i += 1
-    log_scores(get_scores(column + " Neural Network", y_test, nn_pred))
+    # log_scores(get_scores(column + " Neural Network", y_test, nn_pred))
 
     # ------- using mlp -------
-    for i in range(0):
-        mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
-                           verbose=False,
-                           max_iter=400)
-        mlp.fit(X_train, y_train)
-        mlp_pred = mlp.predict(X_test)
-        mlp_pred = bring_to_zero(mlp_pred)
-        merged_pred[column].append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
+    # for i in range(0):
+    #     mlp = MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001,
+    #                        verbose=False,
+    #                        max_iter=400)
+    #     mlp.fit(X_train, y_train)
+    #     mlp_pred = mlp.predict(X_test)
+    #     mlp_pred = bring_to_zero(mlp_pred)
+    #     merged_pred[column].append(pd.Series(mlp_pred, name='pred_mlp' + str(i)))
 
     # merging the results from each method in a single dataframe
     merged_pred_df[column] = pd.concat(merged_pred[column], axis=1)
@@ -100,6 +110,7 @@ for column in predict_columns:
     # getting the mean
     mean_pred[column] = pd.DataFrame()
     mean_pred[column]['avg'] = merged_pred_df[column].mean(axis=1)  # getting the mean average of the columns
+
     # scores = get_scores(column + " AVG prediction", y_test, bring_to_zero(mean_pred[column]['avg'].tolist()))
     # with open('log.txt', append_write) as file:
     #     file.write(scores)
@@ -117,15 +128,22 @@ for column in predict_columns:
 # now we are going to merge casual and registered predictions
 summed_pred = mean_pred['casual'] + mean_pred['registered']
 
-log_scores(get_scores("Summed prediction", y_test, summed_pred))
+# log_scores(get_scores("Summed prediction", y_test, summed_pred))
 summed_pred_array = summed_pred.to_numpy()
 # create_submission(summed_pred_array, filename='sum.csv')
-summed_pred_array = np.floor(summed_pred_array)
+floor_array = deepcopy(summed_pred_array)
+floor_array = np.floor(floor_array)
 # create_submission(summed_pred_array, filename='sum_floor.csv')
 
-log_scores(get_scores('Floor summed predictions', y_test, summed_pred_array))
-summed_pred = mean_pred['registered']['avg'] + merged_pred['test']
-log_scores(get_scores('summed predictions with descent', y_test, summed_pred))
+# log_scores(get_scores('Floor summed predictions', y_test, floor_array))
+create_submission(floor_array, filename='LastHope.csv')
+
+
+# total_df = pd.DataFrame({'summed': summed_pred_array[:,0], 'floored': floor_array[:,0]})
+# total_df['avg'] = total_df.mean(numeric_only=True, axis=1)
+# log_scores(get_scores("mean_summed", y_test, bring_to_zero(total_df['avg'].tolist())))
+# summed_pred = mean_pred['registered']['avg'] + merged_pred['test']
+# log_scores(get_scores('summed predictions with descent', y_test, summed_pred))
 
 # create_submission(summed_pred, filename='gradient_sum_full.csv')
 
