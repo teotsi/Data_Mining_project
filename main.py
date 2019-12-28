@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics.regression import mean_squared_log_error, r2_score
 from sklearn.model_selection import GridSearchCV
 # matplotlib inline
-# from sklearn.linear_model import SGDClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
 pd.set_option('display.max_columns', 100)
@@ -48,7 +48,7 @@ def read_data(filename):
 
 
 filename = 'train.csv'
-df_train = read_data(filename)
+df_train =read_data(filename)
 # print(df_train.head(10))
 
 df_test = read_data('test.csv')  # reading test file
@@ -64,44 +64,31 @@ X = df_train[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # 
 # print(X)
 y = df_train['count']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
 
 # #->Prediction
 # clf = LogisticRegression(n_jobs=-1, solver="newton-cg")
 # clf.fit(X_train, y_train)
-# parameters = {'kernel': ('linear', 'poly', 'rbf'), 'C': [1, 2, 5, 100], 'gamma': [1e-3, 1e-4]}
-# svc = svm.SVC(gamma="scale")
-# clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1, verbose=3)
-# clf=svm.SVC(2, 'linear', 0.001)
-# clf.fit(X, y)
-# y_pred = clf.predict(X_test)
-base_cls=LogisticRegression(solver='lbfgs', n_jobs=-1)
-neural=MLPRegressor(hidden_layer_sizes=(100, 60, 40, 20), activation='relu', solver='lbfgs', alpha=0.0001, verbose=True)
-estimators=[]
-estimators.append(base_cls)
-estimators.append(neural)
-BaggingClassifier.estimators_=estimators
-model=BaggingClassifier(base_estimator=base_cls, random_state=8)
-model.fit(X_train,y_train)
-y_pred=model.predict(X_test)
+parameters = {'kernel': ('linear', 'poly', 'rbf'), 'C': [1, 2, 5], 'gamma': [1e-3, 1e-4]}
+svc = svm.SVC(gamma="scale")
+clf = GridSearchCV(svc, parameters, cv=5, n_jobs=-1, verbose=3)
+# clf = RandomForestRegressor(n_estimators=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+# print(y_pred)
+
 for i, y in enumerate(y_pred):
     if y_pred[i] < 0:
         y_pred[i] = 0
 
 print('RMSLE:', np.sqrt(mean_squared_log_error(y_test, y_pred)))
 print('R2:', r2_score(y_test, y_pred))
-# print('Best C:', clf.best_estimator_.C)
-# print('Best Kernel:', clf.best_estimator_.kernel)
-# print('Best Gamma:', clf.best_estimator_.gamma)
+print(clf._best_params_)
 # print (df_test.head(5))
-# df_test['weather_4'] = 0
-# df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
-# y_pred = model.predict(df_test)
-# for i, y in enumerate(y_pred):
-#     if y_pred[i] < 0:
-#         y_pred[i] = 0
-#
-# submission = pd.DataFrame()
-# submission['Id'] = range(y_pred.shape[0])
-# submission['Predicted'] = y_pred
-# submission.to_csv("submission.csv", index=False)
+df_test['weather_4'] = 0
+df_test = df_test[[x for x in all_columns if x.startswith(tuple(train_columns))]]  # getting all desired
+y_pred = clf.predict(df_test)
+for i, y in enumerate(y_pred):
+    if y_pred[i] < 0:
+        y_pred[i] = 0
